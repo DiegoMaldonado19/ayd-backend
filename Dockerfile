@@ -21,13 +21,12 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
+# Install curl (útil para debugging)
+RUN apk add --no-cache curl
+
 # Copy JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
-
-# Add health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
