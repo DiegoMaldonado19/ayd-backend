@@ -16,7 +16,7 @@ services:
       - mariadb_data:/var/lib/mysql
 
   app:
-    image: dmaldonado/sie-backend:${VERSION:-latest}
+    image: djmaldonado19/sie-backend:${VERSION:-latest}
     container_name: sie_backend
     restart: always
     depends_on:
