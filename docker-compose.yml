@@ -20,12 +20,11 @@ services:
     container_name: sie_backend
     restart: always
     depends_on:
-      mariadb:
+      - mariadb
     environment:
       DB_URL: ${SPRING_DATASOURCE_URL}
       DB_USER: ${SPRING_DATASOURCE_USERNAME}
       DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
