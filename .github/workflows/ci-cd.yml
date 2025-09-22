@@ -10,7 +10,7 @@ env:
   DOCKER_IMAGE: sie-backend
   DOCKER_USERNAME: djmaldonado19
   SERVER_IP: 20.55.81.100
-  SERVER_PATH: /opt/springboot-app
+  SERVER_PATH: /home/azureuser/repos/ayd-backend
 
 jobs:
   build:
@@ -56,7 +56,7 @@ jobs:
           # Deploy using SSH
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ env.SERVER_IP }} "
             cd ${{ env.SERVER_PATH }} &&
-            echo VERSION=${{ github.run_number }} > .env &&
+            git pull origin main &&
             docker-compose pull &&
             docker-compose down &&
             docker-compose up -d
