@@ -82,7 +82,7 @@ jobs:
             echo 'Container status:' &&
             docker-compose ps &&
             
-            echo '📝 Application logs (last 20 lines):' &&
+            echo 'Application logs (last 20 lines):' &&
             docker-compose logs --tail=20 app || true &&
             
             echo 'Testing application health...' &&
