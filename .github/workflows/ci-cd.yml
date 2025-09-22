@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_IMAGE: sie-backend
-  DOCKER_USERNAME: dmaldonado
+  DOCKER_USERNAME: djmaldonado19
   SERVER_IP: 20.55.81.100
   SERVER_PATH: /opt/springboot-app
 
