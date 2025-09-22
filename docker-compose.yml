@@ -6,27 +6,47 @@ services:
     container_name: mariadb
     restart: always
     environment:
-      MARIADB_ROOT_PASSWORD: root
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MARIADB_DATABASE: sie_db
-      MARIADB_USER: user
-      MARIADB_PASSWORD: password
+      MARIADB_USER: ${SPRING_DATASOURCE_USERNAME}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
 
   app:
     image: djmaldonado19/sie-backend:${VERSION:-latest}
     container_name: sie_backend
     restart: always
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     environment:
-      DB_URL: jdbc:mariadb://mariadb:3306/sie_db
-      DB_USER: user
-      DB_PASSWORD: password
+      DB_URL: ${SPRING_DATASOURCE_URL}
+      DB_USER: ${SPRING_DATASOURCE_USERNAME}
+      DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      start_period: 30s
+      start_interval: 5s
+      interval: 1m
+      timeout: 3s
+      retries: 3
 
 volumes:
   mariadb_data:

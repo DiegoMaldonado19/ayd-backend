@@ -56,7 +56,22 @@ jobs:
           # Deploy using SSH
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ env.SERVER_IP }} "
             cd ${{ env.SERVER_PATH }} &&
+            
             git pull origin main &&
+            
+            cat > .env << 'EOL'
+            # Spring Boot Database Configuration
+            SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/sie_db
+            SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+            # Docker Compose Variables
+            MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+            MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            VERSION=latest
+            EOL
+            
+            # Deploy
             docker-compose pull &&
             docker-compose down &&
             docker-compose up -d
