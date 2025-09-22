@@ -59,17 +59,12 @@ jobs:
             
             git pull origin main &&
             
-            cat > .env << 'EOL'
-            # Spring Boot Database Configuration
-            SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/sie_db
+            echo 'SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
             SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}
             SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
-
-            # Docker Compose Variables
             MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
             MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            VERSION=latest
-            EOL
+            VERSION=latest' > .env &&
             
             # Deploy
             docker-compose pull &&
