@@ -56,20 +56,42 @@ jobs:
           # Deploy using SSH
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ env.SERVER_IP }} "
             cd ${{ env.SERVER_PATH }} &&
-            
             git pull origin main &&
             
-            echo 'SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-            SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
-            MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-            MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            VERSION=latest' > .env &&
+            # Crear .env usando echo (compatible con Docker Compose 1.29.2)
+            echo 'SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/sie_db' > .env &&
+            echo 'SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}' >> .env &&
+            echo 'SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
+            echo 'MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}' >> .env &&
+            echo 'MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
+            echo 'VERSION=latest' >> .env &&
+            echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env &&
+            echo 'API_KEY=${{ secrets.API_KEY }}' >> .env &&
             
-            # Deploy
+            echo 'Generated .env file:' &&
+            cat .env &&
+            echo '' &&
+            
             docker-compose pull &&
             docker-compose down &&
-            docker-compose up -d
+            docker-compose up -d &&
+            
+            echo 'Waiting for containers to start...' &&
+            sleep 15 &&
+            
+            echo 'Container status:' &&
+            docker-compose ps &&
+            
+            echo 'Application logs (last 20 lines):' &&
+            docker-compose logs --tail=20 app || true &&
+            
+            echo 'Testing application health...' &&
+            if curl -f http://localhost:8080/actuator/health --max-time 10 2>/dev/null; then
+              echo 'Application is responding!'
+            else
+              echo 'Application not responding yet (might need more time)'
+              echo 'Check logs: docker-compose logs app'
+            fi
           "
           echo "Deployment completed"
 
