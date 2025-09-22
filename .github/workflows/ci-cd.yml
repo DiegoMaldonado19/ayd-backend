@@ -65,8 +65,6 @@ jobs:
             echo 'MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}' >> .env &&
             echo 'MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
             echo 'VERSION=latest' >> .env &&
-            echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env &&
-            echo 'API_KEY=${{ secrets.API_KEY }}' >> .env &&
             
             echo 'Generated .env file:' &&
             cat .env &&
