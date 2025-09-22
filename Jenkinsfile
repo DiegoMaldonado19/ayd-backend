@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "sie-backend"
         DOCKER_CREDENTIALS = 'dockerhub-creds'
-        DOCKER_USERNAME = 'dmaldonado'
+        DOCKER_USERNAME = 'djmaldonado19'
         SERVER_IP = '20.55.81.100'
         SERVER_PATH = '/opt/springboot-app'
     }
@@ -24,7 +24,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image for branch: ${env.GIT_BRANCH}"
-                    docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                    sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
                 }
             }
         }
@@ -34,13 +34,17 @@ pipeline {
                 branch 'main'
             }
             steps {
-                script {
-                    echo "Pushing Docker image to Docker Hub"
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
-                        sh "docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                        sh "docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
-                        sh "docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                        sh "docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
+                withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                        echo "Pushing Docker image to Docker Hub"
+                        sh """
+                            echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                            docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest
+                            docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest
+                            docker logout
+                        """
                     }
                 }
             }
