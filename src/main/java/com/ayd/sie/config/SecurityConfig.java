@@ -1,5 +1,7 @@
 package com.ayd.sie.config;
 
+import com.ayd.sie.shared.infrastructure.security.JwtAuthenticationEntryPoint;
+import com.ayd.sie.shared.infrastructure.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +26,11 @@ public class SecurityConfig {
     @Autowired
     private CorsConfigurationSource corsConfigurationSource;
 
-    // JWT Authentication Entry Point will be implemented later
-    // private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    // JWT Authentication Filter will be implemented later
-    // private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -68,33 +70,32 @@ public class SecurityConfig {
                         // Actuator endpoints
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/info").permitAll()
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").hasRole("ADMINISTRADOR")
 
                         // Static resources
                         .requestMatchers("/uploads/**").permitAll()
 
                         // Admin endpoints - only for administrators (DESPUES de los test endpoints)
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRADOR")
 
                         // Coordinator endpoints - for coordinators and admins
-                        .requestMatchers("/api/v1/coordinator/**").hasAnyRole("ADMIN", "COORDINATOR")
+                        .requestMatchers("/api/v1/coordinator/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR")
 
                         // Courier endpoints - for couriers, coordinators and admins
-                        .requestMatchers("/api/v1/courier/**").hasAnyRole("ADMIN", "COORDINATOR", "COURIER")
+                        .requestMatchers("/api/v1/courier/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "REPARTIDOR")
 
                         // Business endpoints - for businesses, coordinators and admins
-                        .requestMatchers("/api/v1/business/**").hasAnyRole("ADMIN", "COORDINATOR", "BUSINESS")
+                        .requestMatchers("/api/v1/business/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "COMERCIO")
 
                         // All other requests require authentication
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
 
-        // Exception handling will be implemented later
-        // .exceptionHandling(exception -> exception
-        // .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                // Exception handling
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-        // JWT filter will be added later
-        // .addFilterBefore(jwtAuthenticationFilter,
-        // UsernamePasswordAuthenticationFilter.class);
+                // JWT filter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

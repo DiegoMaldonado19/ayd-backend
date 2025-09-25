@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,21 +38,27 @@ public class JwtUtil {
     }
 
     public String generateRefreshToken(String email) {
+        Instant now = Instant.now();
+        Instant expiration = now.plusMillis(appProperties.getJwt().getRefreshExpiration());
+
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + appProperties.getJwt().getRefreshExpiration()))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .subject(email)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(getSigningKey())
                 .compact();
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+        Instant now = Instant.now();
+        Instant expiration = now.plusMillis(appProperties.getJwt().getExpiration());
+
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + appProperties.getJwt().getExpiration()))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -78,11 +85,11 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (ExpiredJwtException e) {
             log.warn("JWT token expired: {}", e.getMessage());
             throw new InvalidTokenException("Token has expired");
@@ -92,6 +99,9 @@ public class JwtUtil {
         } catch (MalformedJwtException e) {
             log.warn("Malformed JWT token: {}", e.getMessage());
             throw new InvalidTokenException("Invalid token format");
+        } catch (JwtException e) {
+            log.warn("JWT token validation error: {}", e.getMessage());
+            throw new InvalidTokenException("Token validation failed");
         } catch (IllegalArgumentException e) {
             log.warn("JWT claims string is empty: {}", e.getMessage());
             throw new InvalidTokenException("Token claims are empty");
