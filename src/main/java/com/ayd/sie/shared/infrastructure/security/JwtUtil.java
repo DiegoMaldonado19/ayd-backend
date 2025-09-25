@@ -49,6 +49,19 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generatePasswordResetToken(String email, Map<String, Object> claims) {
+        Instant now = Instant.now();
+        Instant expiration = now.plusMillis(appProperties.getSecurity().getPasswordResetExpiration());
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(email)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
     private String createToken(Map<String, Object> claims, String subject) {
         Instant now = Instant.now();
         Instant expiration = now.plusMillis(appProperties.getJwt().getExpiration());
