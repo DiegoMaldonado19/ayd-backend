@@ -61,6 +61,8 @@ jobs:
             echo 'SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
             echo 'MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}' >> .env &&
             echo 'MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
+            echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env &&
+            echo 'MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}' >> .env &&
             echo 'VERSION=latest' >> .env &&
             
             # Deploy
