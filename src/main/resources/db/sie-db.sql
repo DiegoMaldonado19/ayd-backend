@@ -126,13 +126,16 @@ CREATE TABLE users (
     last_login DATETIME,
     failed_login_attempts INT DEFAULT 0,
     locked_until DATETIME,
+    password_reset_token VARCHAR(8),
+    password_reset_expiration DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(role_id),
     INDEX idx_email (email),
     INDEX idx_role (role_id),
     INDEX idx_active (active),
-    INDEX idx_2fa_code (two_factor_code, two_factor_expiration)
+    INDEX idx_2fa_code (two_factor_code, two_factor_expiration),
+    INDEX idx_password_reset_token (password_reset_token, password_reset_expiration)
 ) ENGINE=InnoDB;
 
 -- TABLE: refresh_tokens
