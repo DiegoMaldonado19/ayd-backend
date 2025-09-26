@@ -11,47 +11,58 @@ import java.util.Arrays;
 @Configuration
 public class CorsConfig {
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow specific origins for development and production
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:*",
-                "http://127.0.0.1:*",
-                "http://20.55.81.100:*",
-                "https://20.55.81.100:*"));
+                // Allow specific origins for development and production
+                configuration.setAllowedOriginPatterns(Arrays.asList(
+                                // Local development - Postman testing
+                                "http://localhost:*",
+                                "http://127.0.0.1:*",
 
-        // Allow all standard HTTP methods
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                                // Angular development server (puerto 4200 específico)
+                                "http://localhost:4200",
+                                "http://127.0.0.1:4200",
 
-        // Allow all headers typically used by Angular applications
-        configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Access-Control-Request-Method",
-                "Access-Control-Request-Headers",
-                "X-CSRF-TOKEN"));
+                                // Azure production server HTTP/HTTPS
+                                "http://20.55.81.100:*",
+                                "https://20.55.81.100:*",
 
-        // Expose headers that might be needed by the frontend
-        configuration.setExposedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Disposition",
-                "X-Total-Count"));
+                                // Docker internal network communication
+                                "http://sie_backend:*",
+                                "http://app:*"));
 
-        // Allow credentials (cookies, authorization headers, TLS client certificates)
-        configuration.setAllowCredentials(true);
+                // Allow all standard HTTP methods
+                configuration.setAllowedMethods(Arrays.asList(
+                                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Cache preflight response for 1 hour
-        configuration.setMaxAge(3600L);
+                // Allow all headers typically used by Angular applications
+                configuration.setAllowedHeaders(Arrays.asList(
+                                "Authorization",
+                                "Content-Type",
+                                "X-Requested-With",
+                                "Accept",
+                                "Origin",
+                                "Access-Control-Request-Method",
+                                "Access-Control-Request-Headers",
+                                "X-CSRF-TOKEN"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/v1/**", configuration);
+                // Expose headers that might be needed by the frontend
+                configuration.setExposedHeaders(Arrays.asList(
+                                "Authorization",
+                                "Content-Disposition",
+                                "X-Total-Count"));
 
-        return source;
-    }
+                // Allow credentials (cookies, authorization headers, TLS client certificates)
+                configuration.setAllowCredentials(true);
+
+                // Cache preflight response for 1 hour
+                configuration.setMaxAge(3600L);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/api/v1/**", configuration);
+
+                return source;
+        }
 }

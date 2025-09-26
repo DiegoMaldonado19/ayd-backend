@@ -9,7 +9,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,19 +17,11 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
-        @Value("${server.servlet.context-path:/api/v1}")
-        private String contextPath;
-
-        @Value("${server.port:8080}")
-        private String serverPort;
-
         @Bean
         public OpenAPI customOpenAPI() {
-                String contextPathFormatted = contextPath.equals("/") ? "" : contextPath;
-
                 return new OpenAPI()
                                 .info(getApiInfo())
-                                .servers(getServers(contextPathFormatted))
+                                .servers(getServers())
                                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                                 .components(new Components()
                                                 .addSecuritySchemes("bearerAuth",
@@ -42,50 +33,10 @@ public class SwaggerConfig {
         }
 
         @Bean
-        public GroupedOpenApi adminApi() {
-                return GroupedOpenApi.builder()
-                                .group("01-admin")
-                                .pathsToMatch("/api/v1/admin/**")
-                                .build();
-        }
-
-        @Bean
-        public GroupedOpenApi coordinatorApi() {
-                return GroupedOpenApi.builder()
-                                .group("02-coordinator")
-                                .pathsToMatch("/api/v1/coordinator/**")
-                                .build();
-        }
-
-        @Bean
-        public GroupedOpenApi courierApi() {
-                return GroupedOpenApi.builder()
-                                .group("03-courier")
-                                .pathsToMatch("/api/v1/courier/**")
-                                .build();
-        }
-
-        @Bean
-        public GroupedOpenApi businessApi() {
-                return GroupedOpenApi.builder()
-                                .group("04-business")
-                                .pathsToMatch("/api/v1/business/**")
-                                .build();
-        }
-
-        @Bean
-        public GroupedOpenApi publicApi() {
-                return GroupedOpenApi.builder()
-                                .group("05-public")
-                                .pathsToMatch("/api/v1/public/**", "/api/v1/auth/**", "/api/v1/tracking/public/**")
-                                .build();
-        }
-
-        @Bean
         public GroupedOpenApi allApi() {
                 return GroupedOpenApi.builder()
                                 .group("00-all-endpoints")
-                                .pathsToMatch("/api/v1/**")
+                                .pathsToMatch("/**")
                                 .build();
         }
 
@@ -111,19 +62,13 @@ public class SwaggerConfig {
                                                 .url("https://www.example.com/license"));
         }
 
-        private List<Server> getServers(String contextPathFormatted) {
+        private List<Server> getServers() {
                 return List.of(
                                 new Server()
-                                                .url("http://localhost:" + serverPort + contextPathFormatted)
-                                                .description("Development Server (Local)")
-                                                .variables(null),
+                                                .url("http://localhost:8080/api/v1")
+                                                .description("Development Server (Local)"),
                                 new Server()
-                                                .url("http://20.55.81.100:8080" + contextPathFormatted)
-                                                .description("Production Server (Azure HTTP)")
-                                                .variables(null),
-                                new Server()
-                                                .url("https://20.55.81.100:8080" + contextPathFormatted)
-                                                .description("Production Server (Azure HTTPS)")
-                                                .variables(null));
+                                                .url("http://20.55.81.100:8080/api/v1")
+                                                .description("Production Server (Azure HTTP)"));
         }
 }
