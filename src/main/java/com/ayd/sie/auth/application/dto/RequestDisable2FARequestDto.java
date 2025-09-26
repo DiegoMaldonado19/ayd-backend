@@ -12,16 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Disable 2FA request")
-public class Disable2FARequestDto {
+@Schema(description = "Request disable 2FA - Step 1: Validate password and send code")
+public class RequestDisable2FARequestDto {
 
     @JsonProperty("password")
     @NotBlank(message = "Password is required to disable 2FA")
     @Schema(description = "Current password for verification", example = "Admin123!")
     private String password;
-
-    @JsonProperty("verification_code")
-    @NotBlank(message = "Current 2FA code is required")
-    @Schema(description = "Current 2FA verification code", example = "123456")
-    private String verificationCode;
 }

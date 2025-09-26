@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -25,9 +27,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    private static final List<String> PUBLIC_ENDPOINTS = Arrays.asList(
+            "/auth/login",
+            "/auth/verify-2fa",
+            "/auth/refresh-token",
+            "/auth/forgot-password",
+            "/auth/reset-password",
+            "/auth/validate-reset-token",
+            "/auth/resend-2fa-code",
+            "/auth/validate-token",
+            "/swagger-ui",
+            "/v3/api-docs",
+            "/swagger-resources",
+            "/webjars",
+            "/actuator/health",
+            "/actuator/info",
+            "/public",
+            "/tracking/public",
+            "/uploads");
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
+
+        // Remove context path from request URI for matching
+        String path = requestURI;
+        if (contextPath != null && !contextPath.isEmpty()) {
+            path = requestURI.substring(contextPath.length());
+        }
+
+        // Skip JWT processing for public endpoints
+        if (isPublicEndpoint(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         final String authorizationHeader = request.getHeader("Authorization");
 
@@ -71,5 +107,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPublicEndpoint(String path) {
+        return PUBLIC_ENDPOINTS.stream()
+                .anyMatch(endpoint -> path.startsWith(endpoint) || path.contains(endpoint));
     }
 }

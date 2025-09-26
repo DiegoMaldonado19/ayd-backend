@@ -46,26 +46,32 @@ public class SecurityConfig {
 
                 // Configure authorization rules
                 .authorizeHttpRequests(authz -> authz
-                        // Swagger/OpenAPI endpoints - DEBE IR PRIMERO
-                        .requestMatchers("/api/v1/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/v1/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/api-docs/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        // Public authentication endpoints - DEBE IR PRIMERO Y SER MUY ESPECÍFICO
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/verify-2fa").permitAll()
+                        .requestMatchers("/auth/refresh-token").permitAll()
+                        .requestMatchers("/auth/forgot-password").permitAll()
+                        .requestMatchers("/auth/reset-password").permitAll()
+                        .requestMatchers("/auth/validate-reset-token").permitAll()
+                        .requestMatchers("/auth/resend-2fa-code").permitAll()
+                        .requestMatchers("/auth/validate-token").permitAll()
+
+                        // Swagger/OpenAPI endpoints
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-resources/**").permitAll()
                         .requestMatchers("/webjars/**").permitAll()
 
-                        // Public endpoints - no authentication required
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/public/**").permitAll()
-                        .requestMatchers("/api/v1/tracking/public/**").permitAll()
+                        // Public endpoints
+                        .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/tracking/public/**").permitAll()
 
-                        // Test endpoints - for development/verification (specify each one explicitly)
-                        .requestMatchers("/api/v1/admin/test/**").permitAll()
-                        .requestMatchers("/api/v1/coordinator/test/**").permitAll()
-                        .requestMatchers("/api/v1/courier/test/**").permitAll()
-                        .requestMatchers("/api/v1/business/test/**").permitAll()
+                        // Test endpoints - for development/verification
+                        .requestMatchers("/admin/test/**").permitAll()
+                        .requestMatchers("/coordinator/test/**").permitAll()
+                        .requestMatchers("/courier/test/**").permitAll()
+                        .requestMatchers("/business/test/**").permitAll()
 
                         // Actuator endpoints
                         .requestMatchers("/actuator/health").permitAll()
@@ -75,17 +81,26 @@ public class SecurityConfig {
                         // Static resources
                         .requestMatchers("/uploads/**").permitAll()
 
-                        // Admin endpoints - only for administrators (DESPUES de los test endpoints)
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMINISTRADOR")
+                        // Protected authentication endpoints (require authentication)
+                        .requestMatchers("/auth/logout").authenticated()
+                        .requestMatchers("/auth/change-password").authenticated()
+                        .requestMatchers("/auth/enable-2fa").authenticated()
+                        .requestMatchers("/auth/disable-2fa").authenticated()
+                        .requestMatchers("/auth/me").authenticated()
+                        .requestMatchers("/auth/sessions").authenticated()
+                        .requestMatchers("/auth/revoke-token").authenticated()
+
+                        // Admin endpoints - only for administrators
+                        .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
 
                         // Coordinator endpoints - for coordinators and admins
-                        .requestMatchers("/api/v1/coordinator/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR")
+                        .requestMatchers("/coordinator/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR")
 
                         // Courier endpoints - for couriers, coordinators and admins
-                        .requestMatchers("/api/v1/courier/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "REPARTIDOR")
+                        .requestMatchers("/courier/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "REPARTIDOR")
 
                         // Business endpoints - for businesses, coordinators and admins
-                        .requestMatchers("/api/v1/business/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "COMERCIO")
+                        .requestMatchers("/business/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "COMERCIO")
 
                         // All other requests require authentication
                         .anyRequest().authenticated())

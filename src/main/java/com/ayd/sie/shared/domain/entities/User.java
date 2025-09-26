@@ -64,6 +64,12 @@ public class User {
     @Column(name = "two_factor_expiration")
     private LocalDateTime twoFactorExpiration;
 
+    @Column(name = "password_reset_token", length = 8)
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_expiration")
+    private LocalDateTime passwordResetExpiration;
+
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
@@ -111,5 +117,17 @@ public class User {
                 twoFactorCode.equals(code) &&
                 twoFactorExpiration != null &&
                 LocalDateTime.now().isBefore(twoFactorExpiration);
+    }
+
+    public boolean isPasswordResetTokenValid(String token) {
+        return passwordResetToken != null &&
+                passwordResetToken.equals(token) &&
+                passwordResetExpiration != null &&
+                LocalDateTime.now().isBefore(passwordResetExpiration);
+    }
+
+    public void clearPasswordResetToken() {
+        this.passwordResetToken = null;
+        this.passwordResetExpiration = null;
     }
 }

@@ -2,52 +2,48 @@ package com.ayd.sie.auth.application.usecases;
 
 import com.ayd.sie.auth.application.dto.ValidateResetTokenRequestDto;
 import com.ayd.sie.auth.application.dto.ValidateResetTokenResponseDto;
-import com.ayd.sie.shared.infrastructure.security.JwtUtil;
+import com.ayd.sie.shared.domain.entities.User;
+import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ValidateResetTokenUseCase {
 
-    private final JwtUtil jwtUtil;
+    private final UserJpaRepository userRepository;
 
     public ValidateResetTokenResponseDto execute(ValidateResetTokenRequestDto request) {
-        try {
-            String email = jwtUtil.extractUsername(request.getResetToken());
-            String tokenType = jwtUtil.extractClaim(request.getResetToken(), 
-                claims -> claims.get("tokenType", String.class));
-            
-            if (!"PASSWORD_RESET".equals(tokenType)) {
-                return ValidateResetTokenResponseDto.builder()
-                        .isValid(false)
-                        .build();
-            }
+        Optional<User> optionalUser = userRepository.findByPasswordResetToken(request.getResetToken());
 
-            Date expiration = jwtUtil.extractExpiration(request.getResetToken());
-            long expiresInMillis = expiration.getTime() - System.currentTimeMillis();
-            
-            if (expiresInMillis <= 0) {
-                return ValidateResetTokenResponseDto.builder()
-                        .isValid(false)
-                        .build();
-            }
-
-            return ValidateResetTokenResponseDto.builder()
-                    .isValid(true)
-                    .expiresInMinutes(expiresInMillis / 60000)
-                    .email(email)
-                    .build();
-
-        } catch (Exception e) {
-            log.warn("Token validation failed: {}", e.getMessage());
+        if (optionalUser.isEmpty()) {
             return ValidateResetTokenResponseDto.builder()
                     .isValid(false)
                     .build();
         }
+
+        User user = optionalUser.get();
+
+        if (!user.isPasswordResetTokenValid(request.getResetToken())) {
+            return ValidateResetTokenResponseDto.builder()
+                    .isValid(false)
+                    .build();
+        }
+
+        long minutesUntilExpiration = ChronoUnit.MINUTES.between(
+                LocalDateTime.now(),
+                user.getPasswordResetExpiration());
+
+        return ValidateResetTokenResponseDto.builder()
+                .isValid(true)
+                .expiresInMinutes(minutesUntilExpiration)
+                .email(user.getEmail())
+                .build();
     }
 }

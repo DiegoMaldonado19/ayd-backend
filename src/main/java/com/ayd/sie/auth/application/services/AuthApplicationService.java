@@ -13,16 +13,17 @@ public class AuthApplicationService {
     private final TwoFactorUseCase twoFactorUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
-    
+
     private final ForgotPasswordUseCase forgotPasswordUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final ValidateResetTokenUseCase validateResetTokenUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
 
     private final Enable2FAUseCase enable2FAUseCase;
-    private final Disable2FAUseCase disable2FAUseCase;
+    private final RequestDisable2FAUseCase requestDisable2FAUseCase;
+    private final ConfirmDisable2FAUseCase confirmDisable2FAUseCase;
     private final Resend2FACodeUseCase resend2FACodeUseCase;
-    
+
     private final GetUserProfileUseCase getUserProfileUseCase;
     private final ListUserSessionsUseCase listUserSessionsUseCase;
     private final ValidateTokenUseCase validateTokenUseCase;
@@ -64,8 +65,13 @@ public class AuthApplicationService {
         return enable2FAUseCase.execute(request, currentUserEmail);
     }
 
-    public void disable2FA(Disable2FARequestDto request, String currentUserEmail) {
-        disable2FAUseCase.execute(request, currentUserEmail);
+    public RequestDisable2FAResponseDto requestDisable2FA(RequestDisable2FARequestDto request,
+            String currentUserEmail) {
+        return requestDisable2FAUseCase.execute(request, currentUserEmail);
+    }
+
+    public void confirmDisable2FA(ConfirmDisable2FARequestDto request, String currentUserEmail) {
+        confirmDisable2FAUseCase.execute(request, currentUserEmail);
     }
 
     public void resend2FACode(Resend2FACodeRequestDto request) {
