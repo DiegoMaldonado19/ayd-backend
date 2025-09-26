@@ -59,10 +59,23 @@ jobs:
             echo 'SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/sie_db' > .env &&
             echo 'SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}' >> .env &&
             echo 'SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
+            echo 'SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver' >> .env &&
             echo 'MARIADB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}' >> .env &&
             echo 'MARIADB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
             echo 'JWT_SECRET=${{ secrets.JWT_SECRET }}' >> .env &&
+            echo 'JWT_EXPIRATION=3600000' >> .env &&
+            echo 'JWT_REFRESH_EXPIRATION=86400000' >> .env &&
+            echo 'MAIL_HOST=smtp.gmail.com' >> .env &&
+            echo 'MAIL_PORT=587' >> .env &&
+            echo 'MAIL_USERNAME=dmaldonado1920@gmail.com' >> .env &&
             echo 'MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}' >> .env &&
+            echo 'FILE_UPLOAD_PATH=/app/uploads' >> .env &&
+            echo 'LOG_LEVEL_APP=INFO' >> .env &&
+            echo 'LOG_LEVEL_SECURITY=WARN' >> .env &&
+            echo 'LOG_LEVEL_WEB=WARN' >> .env &&
+            echo 'LOG_LEVEL_SQL=WARN' >> .env &&
+            echo 'LOG_LEVEL_HIBERNATE=WARN' >> .env &&
+            echo 'LOG_FILE_NAME=/app/logs/sie-application.log' >> .env &&
             echo 'VERSION=latest' >> .env &&
             
             # Deploy
