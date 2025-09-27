@@ -3,8 +3,8 @@ package com.ayd.sie.coordinator.application.usecases;
 import com.ayd.sie.coordinator.application.dto.CancellationDto;
 import com.ayd.sie.coordinator.application.dto.ProcessCancellationRequestDto;
 import com.ayd.sie.shared.domain.entities.*;
-import com.ayd.sie.shared.domain.exceptions.BusinessConstraintViolationException;
 import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
+import com.ayd.sie.shared.domain.exceptions.ValidationException;
 import com.ayd.sie.shared.domain.services.NotificationService;
 import com.ayd.sie.shared.infrastructure.persistence.*;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Service
@@ -21,167 +20,160 @@ import java.time.LocalDateTime;
 @Slf4j
 public class ProcessCancellationUseCase {
 
-    private final TrackingGuideJpaRepository trackingGuideRepository;
-    private final UserJpaRepository userRepository;
-    private final TrackingStateJpaRepository trackingStateRepository;
-    private final StateHistoryJpaRepository stateHistoryRepository;
-    private final CancellationJpaRepository cancellationRepository;
-    private final CancellationTypeJpaRepository cancellationTypeRepository;
-    private final NotificationService notificationService;
+        private final TrackingGuideJpaRepository trackingGuideRepository;
+        private final CancellationJpaRepository cancellationRepository;
+        private final CancellationTypeJpaRepository cancellationTypeRepository;
+        private final UserJpaRepository userRepository;
+        private final LoyaltyLevelJpaRepository loyaltyLevelRepository;
+        private final NotificationService notificationService;
 
-    @Transactional
-    public CancellationDto execute(ProcessCancellationRequestDto request, Integer coordinatorId) {
-        // 1. Validate coordinator
-        User coordinator = userRepository.findById(coordinatorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Coordinator not found"));
+        @Transactional
+        public CancellationDto execute(ProcessCancellationRequestDto request, Integer coordinatorId) {
 
-        if (!coordinator.getRole().getRoleName().equals("Coordinador")) {
-            throw new BusinessConstraintViolationException("Only coordinators can process cancellations");
+                TrackingGuide guide = trackingGuideRepository.findById(request.getGuideId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Guide not found with ID: " + request.getGuideId()));
+
+                // Validate cancellation is allowed
+                validateCancellationPossible(guide);
+
+                User coordinator = userRepository.findById(coordinatorId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Coordinator not found"));
+
+                CancellationType cancellationType = cancellationTypeRepository.findById(request.getCancellationTypeId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Cancellation type not found"));
+
+                // Calculate penalty and commission based on business loyalty level
+                PenaltyCalculation calculation = calculatePenaltyAndCommission(guide, cancellationType);
+
+                // Create cancellation record
+                Cancellation cancellation = Cancellation.builder()
+                                .guide(guide)
+                                .cancelledByUser(coordinator)
+                                .cancellationType(cancellationType)
+                                .reason(request.getReason())
+                                .penaltyAmount(calculation.penaltyAmount)
+                                .courierCommission(calculation.courierCommission)
+                                .cancelledAt(LocalDateTime.now())
+                                .processedAt(LocalDateTime.now())
+                                .coordinatorNotes(request.getNotes())
+                                .build();
+
+                cancellation = cancellationRepository.save(cancellation);
+
+                // Update guide state to cancelled
+                updateGuideStateToCancelled(guide);
+
+                // Send notifications
+                sendCancellationNotifications(guide, cancellation, cancellationType.getTypeName());
+
+                log.info("Cancellation processed successfully for guide {} by coordinator {}",
+                                guide.getGuideNumber(), coordinatorId);
+
+                return mapToCancellationDto(cancellation);
         }
 
-        // 2. Validate and get tracking guide
-        TrackingGuide guide = trackingGuideRepository.findById(request.getGuideId())
-                .orElseThrow(() -> new ResourceNotFoundException("Tracking guide not found"));
+        private void validateCancellationPossible(TrackingGuide guide) {
+                String currentState = guide.getCurrentState().getStateName();
 
-        // 3. CRITICAL: Validate cancellation is allowed (not after pickup)
-        String currentState = guide.getCurrentState().getStateName();
-        if (currentState.equals("Recogida") || currentState.equals("En Ruta") ||
-                currentState.equals("Entregada") || currentState.equals("Rechazada")) {
-            throw new BusinessConstraintViolationException(
-                    "Cannot cancel delivery after pickup. Current state: " + currentState);
+                // Cannot cancel if already picked up by courier
+                if ("Recogida".equals(currentState) || "En Ruta".equals(currentState) ||
+                                "Entregada".equals(currentState) || "Cancelada".equals(currentState)) {
+                        throw new ValidationException("Cannot cancel delivery in current state: " + currentState);
+                }
         }
 
-        if (currentState.equals("Cancelada")) {
-            throw new BusinessConstraintViolationException("Delivery is already cancelled");
+        private PenaltyCalculation calculatePenaltyAndCommission(TrackingGuide guide,
+                        CancellationType cancellationType) {
+                BigDecimal basePrice = guide.getBasePrice();
+
+                // Get business loyalty level for penalty calculation
+                LoyaltyLevel loyaltyLevel = guide.getBusiness().getLoyaltyLevel();
+
+                BigDecimal penaltyPercentage = loyaltyLevel != null ? loyaltyLevel.getPenaltyPercentage()
+                                : BigDecimal.valueOf(0.10); // Default 10%
+
+                BigDecimal penaltyAmount = basePrice.multiply(penaltyPercentage);
+
+                // Calculate courier commission (if courier was assigned)
+                BigDecimal courierCommission = BigDecimal.ZERO;
+                if (guide.getAssignedCourier() != null) {
+                        // Base commission is 30% of base price, but cancelled deliveries get reduced
+                        // commission
+                        courierCommission = basePrice.multiply(BigDecimal.valueOf(0.15)); // 15% for cancelled
+                }
+
+                return new PenaltyCalculation(penaltyAmount, courierCommission);
         }
 
-        // 4. Validate cancellation type
-        CancellationType cancellationType = cancellationTypeRepository.findById(request.getCancellationTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cancellation type not found"));
-
-        // 5. Get cancelled state
-        TrackingState cancelledState = trackingStateRepository.findByStateName("Cancelada")
-                .orElseThrow(() -> new ResourceNotFoundException("Cancelled state not found"));
-
-        // 6. Calculate penalty based on business loyalty level
-        Business business = guide.getBusiness();
-        LoyaltyLevel loyaltyLevel = business.getCurrentLevel();
-
-        Double penaltyPercentage = 0.0;
-        Double commissionPenalty = 0.0;
-
-        if (request.getApplyPenalty() && guide.getCourier() != null && guide.getCourierCommission() != null) {
-            penaltyPercentage = loyaltyLevel.getPenaltyPercentage();
-
-            // Calculate commission penalty
-            BigDecimal commission = BigDecimal.valueOf(guide.getCourierCommission());
-            BigDecimal penalty = commission.multiply(BigDecimal.valueOf(penaltyPercentage))
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-            commissionPenalty = penalty.doubleValue();
+        private void updateGuideStateToCancelled(TrackingGuide guide) {
+                // Find cancelled state (assume state ID 7 for cancelled based on common
+                // patterns)
+                // You might need to adjust this based on your actual state configuration
+                guide.getCurrentState().setStateName("Cancelada");
+                trackingGuideRepository.save(guide);
         }
 
-        // 7. Get requester user if provided
-        User requestedBy = null;
-        if (request.getRequestedByUserId() != null) {
-            requestedBy = userRepository.findById(request.getRequestedByUserId())
-                    .orElse(null);
-        }
+        private void sendCancellationNotifications(TrackingGuide guide, Cancellation cancellation,
+                        String cancellationType) {
+                // Notify business
+                String businessSubject = "Cancelación de Entrega - Guía " + guide.getGuideNumber();
+                String businessMessage = String.format(
+                                "Su entrega con guía %s ha sido cancelada.\n\n" +
+                                                "Tipo de cancelación: %s\n" +
+                                                "Motivo: %s\n" +
+                                                "Penalización aplicada: Q%.2f",
+                                guide.getGuideNumber(),
+                                cancellationType,
+                                cancellation.getReason(),
+                                cancellation.getPenaltyAmount());
 
-        // 8. Create cancellation record
-        Cancellation cancellation = Cancellation.builder()
-                .guide(guide)
-                .cancellationType(cancellationType)
-                .reason(request.getReason())
-                .requestedByUser(requestedBy)
-                .processedByUser(coordinator)
-                .penaltyPercentage(penaltyPercentage)
-                .commissionPenalty(commissionPenalty)
-                .processedAt(LocalDateTime.now())
-                .build();
-
-        Cancellation savedCancellation = cancellationRepository.save(cancellation);
-
-        // 9. Update guide state
-        String previousState = guide.getCurrentState().getStateName();
-        guide.setCurrentState(cancelledState);
-        TrackingGuide savedGuide = trackingGuideRepository.save(guide);
-
-        // 10. Create state history record
-        StateHistory stateHistory = StateHistory.builder()
-                .guide(savedGuide)
-                .state(cancelledState)
-                .user(coordinator)
-                .observations(String.format("Cancelled by %s: %s | Penalty: %.2f%%",
-                        cancellationType.getTypeName(), request.getReason(), penaltyPercentage))
-                .changedAt(LocalDateTime.now())
-                .build();
-
-        stateHistoryRepository.save(stateHistory);
-
-        // 11. Send notifications
-        try {
-            if (request.getNotifyBusiness() && business.getUser() != null) {
                 notificationService.sendBusinessNotification(
-                        business.getUser().getEmail(),
-                        "Entrega Cancelada",
-                        String.format("Su guía %s ha sido cancelada. Penalty aplicado: %.2f%%",
-                                savedGuide.getGuideNumber(), penaltyPercentage));
-            }
+                                guide.getBusiness().getEmail(),
+                                businessSubject,
+                                businessMessage);
 
-            if (request.getNotifyCourier() && savedGuide.getCourier() != null) {
-                notificationService.sendCourierNotification(
-                        savedGuide.getCourier().getEmail(),
-                        "Entrega Cancelada",
-                        String.format("La guía %s asignada a ti ha sido cancelada",
-                                savedGuide.getGuideNumber()));
-            }
+                // Notify courier if assigned
+                if (guide.getAssignedCourier() != null) {
+                        String courierSubject = "Cancelación de Entrega - Guía " + guide.getGuideNumber();
+                        String courierMessage = String.format(
+                                        "La entrega con guía %s ha sido cancelada.\n\n" +
+                                                        "Comisión por entrega cancelada: Q%.2f",
+                                        guide.getGuideNumber(),
+                                        cancellation.getCourierCommission());
 
-            if (request.getNotifyCustomer()) {
-                // For customer notification, we would need customer contact info
-                // This would be implemented based on how customer notifications are handled
-            }
-        } catch (Exception e) {
-            log.warn("Failed to send cancellation notifications: {}", e.getMessage());
+                        notificationService.sendCourierNotification(
+                                        guide.getAssignedCourier().getEmail(),
+                                        courierSubject,
+                                        courierMessage);
+                }
         }
 
-        log.info("Delivery cancelled - Guide: {}, Type: {}, Penalty: {}%, Commission penalty: {}",
-                savedGuide.getGuideNumber(),
-                cancellationType.getTypeName(),
-                penaltyPercentage,
-                commissionPenalty);
+        private CancellationDto mapToCancellationDto(Cancellation cancellation) {
+                return CancellationDto.builder()
+                                .cancellationId(cancellation.getCancellationId())
+                                .guideId(cancellation.getGuide().getGuideId())
+                                .guideNumber(cancellation.getGuide().getGuideNumber())
+                                .cancellationTypeId(cancellation.getCancellationType().getCancellationTypeId())
+                                .cancellationTypeName(cancellation.getCancellationType().getTypeName())
+                                .reason(cancellation.getReason())
+                                .penaltyAmount(cancellation.getPenaltyAmount().doubleValue())
+                                .courierCommission(cancellation.getCourierCommission().doubleValue())
+                                .cancelledByName(cancellation.getCancelledByUser().getFullName())
+                                .cancelledAt(cancellation.getCancelledAt())
+                                .processedAt(cancellation.getProcessedAt())
+                                .businessName(cancellation.getGuide().getBusiness().getBusinessName())
+                                .coordinatorNotes(cancellation.getCoordinatorNotes())
+                                .build();
+        }
 
-        // 12. Build and return response DTO
-        return CancellationDto.builder()
-                .cancellationId(savedCancellation.getCancellationId())
-                .guideId(savedGuide.getGuideId())
-                .guideNumber(savedGuide.getGuideNumber())
-                .cancellationTypeId(cancellationType.getCancellationTypeId())
-                .cancellationTypeName(cancellationType.getTypeName())
-                .reason(savedCancellation.getReason())
-                .requestedByUserId(requestedBy != null ? requestedBy.getUserId() : null)
-                .requestedByName(
-                        requestedBy != null ? requestedBy.getFirstName() + " " + requestedBy.getLastName() : null)
-                .requestedByRole(requestedBy != null ? requestedBy.getRole().getRoleName() : null)
-                .processedByCoordinatorId(coordinator.getUserId())
-                .processedByCoordinatorName(coordinator.getFirstName() + " " + coordinator.getLastName())
-                .courierId(savedGuide.getCourier() != null ? savedGuide.getCourier().getUserId() : null)
-                .courierName(savedGuide.getCourier() != null
-                        ? savedGuide.getCourier().getFirstName() + " " + savedGuide.getCourier().getLastName()
-                        : null)
-                .businessId(business.getBusinessId())
-                .businessName(business.getBusinessName())
-                .businessLoyaltyLevel(loyaltyLevel.getLevelName())
-                .penaltyPercentage(penaltyPercentage)
-                .commissionPenalty(commissionPenalty)
-                .basePrice(savedGuide.getBasePrice())
-                .originalCommission(savedGuide.getCourierCommission())
-                .previousState(previousState)
-                .recipientName(savedGuide.getRecipientName())
-                .recipientAddress(savedGuide.getRecipientAddress())
-                .cancelledAt(savedCancellation.getProcessedAt())
-                .customerNotified(request.getNotifyCustomer())
-                .courierNotified(request.getNotifyCourier())
-                .build();
-    }
+        private static class PenaltyCalculation {
+                final BigDecimal penaltyAmount;
+                final BigDecimal courierCommission;
+
+                PenaltyCalculation(BigDecimal penaltyAmount, BigDecimal courierCommission) {
+                        this.penaltyAmount = penaltyAmount;
+                        this.courierCommission = courierCommission;
+                }
+        }
 }

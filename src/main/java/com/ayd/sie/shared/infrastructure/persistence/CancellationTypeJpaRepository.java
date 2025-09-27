@@ -12,11 +12,15 @@ import java.util.Optional;
 @Repository
 public interface CancellationTypeJpaRepository extends JpaRepository<CancellationType, Integer> {
 
-    @Query("SELECT ct FROM CancellationType ct WHERE ct.active = true ORDER BY ct.typeName")
-    List<CancellationType> findAllActive();
+    List<CancellationType> findByActiveTrueOrderByTypeName();
 
-    @Query("SELECT ct FROM CancellationType ct WHERE ct.typeName = :typeName AND ct.active = true")
-    Optional<CancellationType> findByTypeNameAndActiveTrue(@Param("typeName") String typeName);
+    Optional<CancellationType> findByTypeNameAndActiveTrue(String typeName);
 
-    boolean existsByTypeNameAndActiveTrue(String typeName);
+    boolean existsByTypeName(String typeName);
+
+    @Query("SELECT ct FROM CancellationType ct WHERE ct.active = :active ORDER BY ct.typeName")
+    List<CancellationType> findByActive(@Param("active") Boolean active);
+
+    @Query("SELECT COUNT(ct) FROM CancellationType ct WHERE ct.active = true")
+    long countActiveTypes();
 }

@@ -5,8 +5,6 @@ import com.ayd.sie.coordinator.application.services.CoordinatorApplicationServic
 import com.ayd.sie.shared.infrastructure.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/coordinator")
+@RequestMapping("/api/v1/coordinator")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Coordinator", description = "Coordinator operations for delivery management")
@@ -40,29 +37,28 @@ public class CoordinatorController {
 
     @PostMapping("/assignments")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Assign delivery to courier", description = "Assigns a pending delivery to an available courier with active contract")
+    @Operation(summary = "Assign delivery to courier", description = "Assigns a delivery guide to an available courier")
     @ApiResponse(responseCode = "200", description = "Delivery assigned successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid request or business rule violation")
+    @ApiResponse(responseCode = "400", description = "Invalid assignment request")
     @ApiResponse(responseCode = "404", description = "Guide or courier not found")
-    public ResponseEntity<AssignmentDto> assignDelivery(
-            @Valid @RequestBody AssignDeliveryRequestDto request) {
+    public ResponseEntity<AssignmentDto> assignDelivery(@Valid @RequestBody AssignDeliveryRequestDto request) {
 
         Integer coordinatorId = SecurityUtils.getCurrentUserId();
         AssignmentDto assignment = coordinatorApplicationService.assignDelivery(request, coordinatorId);
 
         log.info("Delivery assigned by coordinator {} - Guide: {}, Courier: {}",
-                coordinatorId, assignment.getGuideId(), assignment.getCourierId());
+                coordinatorId, request.getGuideId(), request.getCourierId());
 
         return ResponseEntity.ok(assignment);
     }
 
-    @GetMapping("/assignments/pending")
+    @GetMapping("/deliveries/pending")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Get pending deliveries", description = "Retrieves all deliveries waiting for assignment")
+    @Operation(summary = "Get pending deliveries", description = "Retrieves paginated list of pending deliveries that need assignment")
     @ApiResponse(responseCode = "200", description = "Pending deliveries retrieved successfully")
     public ResponseEntity<Page<AssignmentDto>> getPendingDeliveries(
             @Parameter(description = "Search term for filtering") @RequestParam(required = false) String search,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
 
         Page<AssignmentDto> pendingDeliveries = coordinatorApplicationService.getPendingDeliveries(search, pageable);
         return ResponseEntity.ok(pendingDeliveries);
@@ -72,9 +68,9 @@ public class CoordinatorController {
     @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get available couriers", description = "Retrieves all active couriers with their workload and contract status")
     @ApiResponse(responseCode = "200", description = "Available couriers retrieved successfully")
-    public ResponseEntity<List<AssignmentDto.CourierWorkloadDto>> getAvailableCouriers() {
+    public ResponseEntity<List<DeliveryDashboardDto.CourierWorkloadDto>> getAvailableCouriers() {
 
-        List<AssignmentDto.CourierWorkloadDto> couriers = coordinatorApplicationService.getAvailableCouriers();
+        List<DeliveryDashboardDto.CourierWorkloadDto> couriers = coordinatorApplicationService.getAvailableCouriers();
         return ResponseEntity.ok(couriers);
     }
 
@@ -105,25 +101,23 @@ public class CoordinatorController {
     @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Report delivery incident", description = "Reports an incident for a delivery in progress")
     @ApiResponse(responseCode = "200", description = "Incident reported successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid incident report")
+    @ApiResponse(responseCode = "400", description = "Invalid incident data")
     @ApiResponse(responseCode = "404", description = "Guide not found")
-    public ResponseEntity<IncidentDto> reportIncident(
-            @Valid @RequestBody ReportIncidentRequestDto request) {
+    public ResponseEntity<IncidentDto> reportIncident(@Valid @RequestBody ReportIncidentRequestDto request) {
 
         Integer coordinatorId = SecurityUtils.getCurrentUserId();
         IncidentDto incident = coordinatorApplicationService.reportIncident(request, coordinatorId);
 
-        log.info("Incident reported by coordinator {} - Guide: {}, Type: {}",
-                coordinatorId, incident.getGuideId(), incident.getIncidentTypeId());
+        log.info("Incident reported by coordinator {} for guide {}", coordinatorId, request.getGuideId());
 
         return ResponseEntity.ok(incident);
     }
 
     @PutMapping("/incidents/{incidentId}/resolve")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Resolve incident", description = "Resolves a reported delivery incident")
+    @Operation(summary = "Resolve incident", description = "Marks an incident as resolved with resolution details")
     @ApiResponse(responseCode = "200", description = "Incident resolved successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid resolution request")
+    @ApiResponse(responseCode = "400", description = "Invalid resolution data")
     @ApiResponse(responseCode = "404", description = "Incident not found")
     public ResponseEntity<IncidentDto> resolveIncident(
             @Parameter(description = "Incident ID to resolve") @PathVariable Integer incidentId,
@@ -132,29 +126,29 @@ public class CoordinatorController {
         Integer coordinatorId = SecurityUtils.getCurrentUserId();
         IncidentDto incident = coordinatorApplicationService.resolveIncident(incidentId, request, coordinatorId);
 
-        log.info("Incident resolved by coordinator {} - Incident: {}", coordinatorId, incidentId);
+        log.info("Incident {} resolved by coordinator {}", incidentId, coordinatorId);
 
         return ResponseEntity.ok(incident);
     }
 
     @GetMapping("/incidents")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Get incidents", description = "Retrieves incidents with optional filtering")
+    @Operation(summary = "Get delivery incidents", description = "Retrieves paginated list of delivery incidents with optional filtering")
     @ApiResponse(responseCode = "200", description = "Incidents retrieved successfully")
     public ResponseEntity<Page<IncidentDto>> getIncidents(
             @Parameter(description = "Filter by resolution status") @RequestParam(required = false) Boolean resolved,
             @Parameter(description = "Search term for filtering") @RequestParam(required = false) String search,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
 
         Page<IncidentDto> incidents = coordinatorApplicationService.getIncidents(resolved, search, pageable);
         return ResponseEntity.ok(incidents);
     }
 
-    // ===== CANCELLATION PROCESSING ENDPOINTS =====
+    // ===== CANCELLATION ENDPOINTS =====
 
     @PostMapping("/cancellations")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Process cancellation", description = "Processes a delivery cancellation with penalty calculation")
+    @Operation(summary = "Process delivery cancellation", description = "Processes a delivery cancellation with penalty calculation")
     @ApiResponse(responseCode = "200", description = "Cancellation processed successfully")
     @ApiResponse(responseCode = "400", description = "Invalid cancellation request")
     @ApiResponse(responseCode = "404", description = "Guide not found")
@@ -164,8 +158,7 @@ public class CoordinatorController {
         Integer coordinatorId = SecurityUtils.getCurrentUserId();
         CancellationDto cancellation = coordinatorApplicationService.processCancellation(request, coordinatorId);
 
-        log.info("Cancellation processed by coordinator {} - Guide: {}, Penalty: {}%",
-                coordinatorId, cancellation.getGuideId(), cancellation.getPenaltyPercentage());
+        log.info("Cancellation processed by coordinator {} for guide {}", coordinatorId, request.getGuideId());
 
         return ResponseEntity.ok(cancellation);
     }
@@ -180,19 +173,23 @@ public class CoordinatorController {
         boolean canCancel = coordinatorApplicationService.validateCancellation(guideId);
 
         return ResponseEntity.ok(Map.of(
-                "guide_id", guideId,
                 "can_cancel", canCancel,
-                "message", canCancel ? "Delivery can be cancelled" : "Delivery cannot be cancelled after pickup"));
+                "guide_id", guideId,
+                "message", canCancel ? "Guide can be cancelled" : "Guide cannot be cancelled"));
     }
 
-    // ===== MONITORING AND DASHBOARD ENDPOINTS =====
+    // ===== DASHBOARD AND MONITORING ENDPOINTS =====
 
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Get delivery dashboard", description = "Retrieves dashboard with delivery metrics and statistics")
+    @Operation(summary = "Get delivery dashboard", description = "Retrieves comprehensive delivery dashboard data for a specific date")
     @ApiResponse(responseCode = "200", description = "Dashboard data retrieved successfully")
     public ResponseEntity<DeliveryDashboardDto> getDeliveryDashboard(
             @Parameter(description = "Dashboard date (defaults to today)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
 
         DeliveryDashboardDto dashboard = coordinatorApplicationService.getDeliveryDashboard(date);
         return ResponseEntity.ok(dashboard);
@@ -200,14 +197,14 @@ public class CoordinatorController {
 
     @GetMapping("/deliveries/history")
     @PreAuthorize("hasRole('Coordinador')")
-    @Operation(summary = "Get delivery history", description = "Retrieves delivery history with filtering options")
+    @Operation(summary = "Get delivery history", description = "Retrieves paginated delivery history with filtering options")
     @ApiResponse(responseCode = "200", description = "Delivery history retrieved successfully")
     public ResponseEntity<Page<AssignmentDto>> getDeliveryHistory(
             @Parameter(description = "Filter by delivery status") @RequestParam(required = false) String status,
-            @Parameter(description = "Search term for filtering") @RequestParam(required = false) String search,
-            @Parameter(description = "Start date for filtering") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @Parameter(description = "End date for filtering") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Search term") @RequestParam(required = false) String search,
+            @Parameter(description = "Start date filter") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @Parameter(description = "End date filter") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @PageableDefault(size = 20, sort = "assignedAt") Pageable pageable) {
 
         Page<AssignmentDto> history = coordinatorApplicationService.getDeliveryHistory(
                 status, search, startDate, endDate, pageable);
@@ -268,10 +265,10 @@ public class CoordinatorController {
         // Get basic metrics
         Page<AssignmentDto> pendingPage = coordinatorApplicationService.getPendingDeliveries(null, Pageable.ofSize(1));
         Page<IncidentDto> incidentsPage = coordinatorApplicationService.getIncidents(false, null, Pageable.ofSize(1));
-        List<AssignmentDto.CourierWorkloadDto> couriers = coordinatorApplicationService.getAvailableCouriers();
+        List<DeliveryDashboardDto.CourierWorkloadDto> couriers = coordinatorApplicationService.getAvailableCouriers();
 
         long activeCouriers = couriers.stream()
-                .filter(AssignmentDto.CourierWorkloadDto::getHasActiveContract)
+                .filter(DeliveryDashboardDto.CourierWorkloadDto::getHasActiveContract)
                 .count();
 
         return ResponseEntity.ok(Map.of(

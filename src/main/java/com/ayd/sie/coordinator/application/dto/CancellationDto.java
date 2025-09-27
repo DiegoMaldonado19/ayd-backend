@@ -46,89 +46,55 @@ public class CancellationDto {
 
     @Schema(description = "Reason for cancellation", example = "Cliente cambio de opinion sobre el producto", required = true)
     @JsonProperty("reason")
-    @NotBlank(message = "Cancellation reason is required")
-    @Size(min = 10, max = 300, message = "Reason must be between 10 and 300 characters")
+    @NotBlank(message = "Reason is required")
+    @Size(max = 500, message = "Reason cannot exceed 500 characters")
     private String reason;
 
-    @Schema(description = "User ID who requested cancellation", example = "13")
-    @JsonProperty("requested_by_user_id")
-    private Integer requestedByUserId;
+    @Schema(description = "Penalty amount applied", example = "15.75")
+    @JsonProperty("penalty_amount")
+    private Double penaltyAmount;
 
-    @Schema(description = "Requester full name", example = "Ricardo Alberto Mendez Silva")
-    @JsonProperty("requested_by_name")
-    private String requestedByName;
+    @Schema(description = "Courier commission for cancelled delivery", example = "6.75")
+    @JsonProperty("courier_commission")
+    private Double courierCommission;
 
-    @Schema(description = "Requester role", example = "Comercio")
-    @JsonProperty("requested_by_role")
-    private String requestedByRole;
+    @Schema(description = "Name of user who cancelled", example = "Ana Sofia Rodriguez Martinez")
+    @JsonProperty("cancelled_by_name")
+    private String cancelledByName;
 
-    @Schema(description = "Coordinator ID who processed cancellation", example = "4")
-    @JsonProperty("processed_by_coordinator_id")
-    private Integer processedByCoordinatorId;
-
-    @Schema(description = "Coordinator name", example = "Luis Fernando Herrera Gonzalez")
-    @JsonProperty("processed_by_coordinator_name")
-    private String processedByCoordinatorName;
-
-    @Schema(description = "Courier ID assigned to the guide", example = "6")
-    @JsonProperty("courier_id")
-    private Integer courierId;
-
-    @Schema(description = "Courier name", example = "Carlos Eduardo Morales Cruz")
-    @JsonProperty("courier_name")
-    private String courierName;
-
-    @Schema(description = "Business ID", example = "3")
-    @JsonProperty("business_id")
-    private Integer businessId;
-
-    @Schema(description = "Business name", example = "Libreria El Saber")
-    @JsonProperty("business_name")
-    private String businessName;
-
-    @Schema(description = "Business loyalty level", example = "Plata")
-    @JsonProperty("business_loyalty_level")
-    private String businessLoyaltyLevel;
-
-    @Schema(description = "Penalty percentage applied", example = "100.00")
-    @JsonProperty("penalty_percentage")
-    private Double penaltyPercentage;
-
-    @Schema(description = "Commission penalty amount", example = "16.50")
-    @JsonProperty("commission_penalty")
-    private Double commissionPenalty;
-
-    @Schema(description = "Base price of the guide", example = "55.00")
-    @JsonProperty("base_price")
-    private Double basePrice;
-
-    @Schema(description = "Original courier commission", example = "16.50")
-    @JsonProperty("original_commission")
-    private Double originalCommission;
-
-    @Schema(description = "State before cancellation", example = "Asignada")
-    @JsonProperty("previous_state")
-    private String previousState;
-
-    @Schema(description = "Recipient name", example = "Carmen Sofia Ruiz")
-    @JsonProperty("recipient_name")
-    private String recipientName;
-
-    @Schema(description = "Recipient address", example = "Decima Calle 5-15 Zona 10")
-    @JsonProperty("recipient_address")
-    private String recipientAddress;
-
-    @Schema(description = "Cancellation timestamp", example = "2024-09-27T13:45:00")
+    @Schema(description = "When the cancellation was requested", example = "2024-09-27T14:30:00")
     @JsonProperty("cancelled_at")
     private LocalDateTime cancelledAt;
 
-    @Schema(description = "Whether customer was notified", example = "true")
-    @JsonProperty("customer_notified")
-    @Builder.Default
-    private Boolean customerNotified = false;
+    @Schema(description = "When the cancellation was processed", example = "2024-09-27T14:35:00")
+    @JsonProperty("processed_at")
+    private LocalDateTime processedAt;
 
-    @Schema(description = "Whether courier was notified", example = "true")
-    @JsonProperty("courier_notified")
-    @Builder.Default
-    private Boolean courierNotified = false;
+    @Schema(description = "Business name", example = "Electronica Moderna")
+    @JsonProperty("business_name")
+    private String businessName;
+
+    @Schema(description = "Coordinator notes", example = "Cancellation approved due to client change of mind")
+    @JsonProperty("coordinator_notes")
+    private String coordinatorNotes;
+
+    @Schema(description = "Base price of the cancelled delivery", example = "45.00")
+    @JsonProperty("base_price")
+    private Double basePrice;
+
+    @Schema(description = "Current delivery status", example = "Asignada")
+    @JsonProperty("current_state")
+    private String currentState;
+
+    @Schema(description = "Assigned courier name", example = "Carlos Eduardo Morales Cruz")
+    @JsonProperty("assigned_courier_name")
+    private String assignedCourierName;
+
+    @Schema(description = "Recipient name", example = "Maria Fernanda Lopez")
+    @JsonProperty("recipient_name")
+    private String recipientName;
+
+    @Schema(description = "Recipient address", example = "Quinta Calle 23-45 Zona 5")
+    @JsonProperty("recipient_address")
+    private String recipientAddress;
 }

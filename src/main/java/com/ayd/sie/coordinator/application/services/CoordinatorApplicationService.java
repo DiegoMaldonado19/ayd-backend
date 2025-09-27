@@ -47,7 +47,7 @@ public class CoordinatorApplicationService {
         return getPendingDeliveriesUseCase.execute(search, pageable);
     }
 
-    public List<AssignmentDto.CourierWorkloadDto> getAvailableCouriers() {
+    public List<DeliveryDashboardDto.CourierWorkloadDto> getAvailableCouriers() {
         return getAvailableCouriersUseCase.execute();
     }
 

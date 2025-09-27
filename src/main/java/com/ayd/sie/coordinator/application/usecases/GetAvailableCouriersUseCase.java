@@ -1,6 +1,6 @@
 package com.ayd.sie.coordinator.application.usecases;
 
-import com.ayd.sie.coordinator.application.dto.AssignmentDto;
+import com.ayd.sie.coordinator.application.dto.DeliveryDashboardDto;
 import com.ayd.sie.shared.domain.entities.User;
 import com.ayd.sie.shared.infrastructure.persistence.ContractJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.TrackingGuideJpaRepository;
@@ -26,7 +26,7 @@ public class GetAvailableCouriersUseCase {
     private final TrackingGuideJpaRepository trackingGuideRepository;
 
     @Transactional(readOnly = true)
-    public List<AssignmentDto.CourierWorkloadDto> execute() {
+    public List<DeliveryDashboardDto.CourierWorkloadDto> execute() {
 
         // Get all active couriers with role "Repartidor"
         Specification<User> spec = (root, query, criteriaBuilder) -> {
@@ -42,10 +42,17 @@ public class GetAvailableCouriersUseCase {
 
         return couriers.stream()
                 .map(this::mapToCourierWorkloadDto)
+                .sorted((a, b) -> {
+                    // Sort by contract status first, then by pending count
+                    if (!a.getHasActiveContract().equals(b.getHasActiveContract())) {
+                        return b.getHasActiveContract().compareTo(a.getHasActiveContract());
+                    }
+                    return a.getPendingCount().compareTo(b.getPendingCount());
+                })
                 .collect(Collectors.toList());
     }
 
-    private AssignmentDto.CourierWorkloadDto mapToCourierWorkloadDto(User courier) {
+    private DeliveryDashboardDto.CourierWorkloadDto mapToCourierWorkloadDto(User courier) {
         // Check if courier has active contract
         boolean hasActiveContract = contractRepository.findActiveContractByUserId(courier.getUserId()).isPresent();
 
@@ -61,7 +68,7 @@ public class GetAvailableCouriersUseCase {
             completionRate = (completedCount * 100.0) / assignedCount;
         }
 
-        return AssignmentDto.CourierWorkloadDto.builder()
+        return DeliveryDashboardDto.CourierWorkloadDto.builder()
                 .courierId(courier.getUserId())
                 .courierName(courier.getFirstName() + " " + courier.getLastName())
                 .assignedCount(assignedCount)
@@ -69,7 +76,7 @@ public class GetAvailableCouriersUseCase {
                 .pendingCount(pendingCount)
                 .incidentsCount(incidentsCount)
                 .hasActiveContract(hasActiveContract)
-                .completionRate(completionRate)
+                .completionRate(Math.round(completionRate * 100.0) / 100.0)
                 .build();
     }
 }
