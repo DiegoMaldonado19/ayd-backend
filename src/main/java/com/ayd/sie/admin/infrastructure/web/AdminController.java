@@ -4,7 +4,7 @@ import com.ayd.sie.admin.application.dto.*;
 import com.ayd.sie.admin.application.services.AdminApplicationService;
 import com.ayd.sie.shared.domain.entities.ContractType;
 import com.ayd.sie.shared.domain.entities.Role;
-import com.ayd.sie.shared.infrastructure.config.CustomUserDetails;
+import com.ayd.sie.shared.infrastructure.security.CustomUserDetails;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -501,21 +501,6 @@ public class AdminController {
     public ResponseEntity<List<LoyaltyLevelDto>> getLoyaltyLevels() {
         List<LoyaltyLevelDto> loyaltyLevels = adminApplicationService.getLoyaltyLevels();
         return ResponseEntity.ok(loyaltyLevels);
-    }
-
-    @PutMapping("/loyalty-levels/{levelId}")
-    @Operation(summary = "Update loyalty level", description = "Update loyalty level information")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Loyalty level updated successfully", content = @Content(schema = @Schema(implementation = LoyaltyLevelDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Loyalty level not found"),
-            @ApiResponse(responseCode = "409", description = "Loyalty level name already exists")
-    })
-    public ResponseEntity<LoyaltyLevelDto> updateLoyaltyLevel(
-            @PathVariable Integer levelId,
-            @Valid @RequestBody UpdateLoyaltyLevelRequestDto request) {
-        LoyaltyLevelDto loyaltyLevel = adminApplicationService.updateLoyaltyLevel(levelId, request);
-        return ResponseEntity.ok(loyaltyLevel);
     }
 
     @PatchMapping("/loyalty-levels/{levelId}/status")
