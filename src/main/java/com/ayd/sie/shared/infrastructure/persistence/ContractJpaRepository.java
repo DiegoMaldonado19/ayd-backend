@@ -36,5 +36,8 @@ public interface ContractJpaRepository extends JpaRepository<Contract, Integer> 
                         "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
         Page<Contract> findActiveBySearch(@Param("search") String search, Pageable pageable);
 
-        boolean existsActiveContractsByType(Integer contractTypeId);
+        @Query("SELECT COUNT(c) > 0 FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true AND "
+                        +
+                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        boolean existsActiveContractsByType(@Param("contractTypeId") Integer contractTypeId);
 }
