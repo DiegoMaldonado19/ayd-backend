@@ -45,7 +45,6 @@ public class GetContractsUseCase {
                 .startDate(contract.getStartDate())
                 .endDate(contract.getEndDate())
                 .active(contract.getActive())
-                .isCurrentlyActive(contract.isCurrentlyActive())
                 .observations(contract.getObservations())
                 .createdAt(contract.getCreatedAt())
                 .updatedAt(contract.getUpdatedAt())

@@ -33,45 +33,42 @@ import java.util.Map;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Administration", description = "Administrative operations for managing the system")
+@Tag(name = "Admin Management", description = "Administrator operations")
 public class AdminController {
 
     private final AdminApplicationService adminApplicationService;
 
-    // Branch Management Endpoints
+    @GetMapping("/access")
+    @Operation(summary = "Verify admin access", description = "Verify administrator access permissions")
+    public ResponseEntity<Map<String, Object>> verifyAdminAccess(
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Admin access confirmed");
+        response.put("user", userDetails.getFullName());
+        response.put("role", userDetails.getRole());
+        response.put("timestamp", System.currentTimeMillis());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==============================================
+    // BRANCH MANAGEMENT
+    // ==============================================
 
     @PostMapping("/branches")
-    @Operation(summary = "Create new branch", description = "Register a new branch in the system")
+    @Operation(summary = "Create branch", description = "Create a new branch")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Branch created successfully", content = @Content(schema = @Schema(implementation = BranchDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
             @ApiResponse(responseCode = "409", description = "Branch code already exists")
     })
-    public ResponseEntity<BranchDto> createBranch(
-            @Valid @RequestBody CreateBranchRequestDto request) {
+    public ResponseEntity<BranchDto> createBranch(@Valid @RequestBody CreateBranchRequestDto request) {
         BranchDto branch = adminApplicationService.createBranch(request);
-        return ResponseEntity.ok(branch);
-    }
-
-    @PutMapping("/branches/{branchId}")
-    @Operation(summary = "Update branch", description = "Update branch information")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Branch updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "404", description = "Branch not found")
-    })
-    public ResponseEntity<BranchDto> updateBranch(
-            @PathVariable Integer branchId,
-            @Valid @RequestBody UpdateBranchRequestDto request) {
-        BranchDto branch = adminApplicationService.updateBranch(branchId, request);
         return ResponseEntity.ok(branch);
     }
 
     @GetMapping("/branches")
     @Operation(summary = "Get branches", description = "Retrieve paginated list of branches")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Branches retrieved successfully")
-    })
     public ResponseEntity<Page<BranchDto>> getBranches(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -86,23 +83,28 @@ public class AdminController {
         return ResponseEntity.ok(branches);
     }
 
-    @DeleteMapping("/branches/{branchId}")
-    @Operation(summary = "Deactivate branch", description = "Deactivate a branch")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Branch deactivated successfully"),
-            @ApiResponse(responseCode = "404", description = "Branch not found")
-    })
-    public ResponseEntity<Map<String, Object>> deactivateBranch(@PathVariable Integer branchId) {
+    @PutMapping("/branches/{branchId}")
+    @Operation(summary = "Update branch", description = "Update branch information")
+    public ResponseEntity<BranchDto> updateBranch(
+            @PathVariable Integer branchId,
+            @Valid @RequestBody UpdateBranchRequestDto request) {
+        BranchDto branch = adminApplicationService.updateBranch(branchId, request);
+        return ResponseEntity.ok(branch);
+    }
+
+    @PatchMapping("/branches/{branchId}/status")
+    @Operation(summary = "Change branch status", description = "Activate or deactivate a branch")
+    public ResponseEntity<Map<String, String>> changeBranchStatus(@PathVariable Integer branchId) {
         adminApplicationService.deactivateBranch(branchId);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Branch deactivated successfully");
-        response.put("timestamp", System.currentTimeMillis());
-
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Branch status changed successfully");
         return ResponseEntity.ok(response);
     }
 
-    // Business Management Endpoints
+    // ==============================================
+    // BUSINESS MANAGEMENT
+    // ==============================================
 
     @PostMapping("/businesses")
     @Operation(summary = "Register business", description = "Register a new business in the system")
@@ -111,18 +113,8 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
             @ApiResponse(responseCode = "409", description = "Email or Tax ID already exists")
     })
-    public ResponseEntity<BusinessDto> registerBusiness(
-            @Valid @RequestBody BusinessRegistrationRequestDto request) {
+    public ResponseEntity<BusinessDto> registerBusiness(@Valid @RequestBody BusinessRegistrationRequestDto request) {
         BusinessDto business = adminApplicationService.registerBusiness(request);
-        return ResponseEntity.ok(business);
-    }
-
-    @PutMapping("/businesses/{businessId}")
-    @Operation(summary = "Update business", description = "Update business information")
-    public ResponseEntity<BusinessDto> updateBusiness(
-            @PathVariable Integer businessId,
-            @Valid @RequestBody UpdateBusinessRequestDto request) {
-        BusinessDto business = adminApplicationService.updateBusiness(businessId, request);
         return ResponseEntity.ok(business);
     }
 
@@ -142,7 +134,16 @@ public class AdminController {
         return ResponseEntity.ok(businesses);
     }
 
-    @DeleteMapping("/businesses/{businessId}")
+    @PutMapping("/businesses/{businessId}")
+    @Operation(summary = "Update business", description = "Update business information")
+    public ResponseEntity<BusinessDto> updateBusiness(
+            @PathVariable Integer businessId,
+            @Valid @RequestBody UpdateBusinessRequestDto request) {
+        BusinessDto business = adminApplicationService.updateBusiness(businessId, request);
+        return ResponseEntity.ok(business);
+    }
+
+    @PatchMapping("/businesses/{businessId}/suspend")
     @Operation(summary = "Suspend business", description = "Suspend a business account")
     public ResponseEntity<Map<String, Object>> suspendBusiness(@PathVariable Integer businessId) {
         adminApplicationService.suspendBusiness(businessId);
@@ -154,7 +155,9 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    // Employee Management Endpoints
+    // ==============================================
+    // EMPLOYEE MANAGEMENT
+    // ==============================================
 
     @PostMapping("/employees")
     @Operation(summary = "Register employee", description = "Register a new employee in the system")
@@ -186,7 +189,38 @@ public class AdminController {
         return ResponseEntity.ok(employees);
     }
 
-    // Contract Management Endpoints
+    @DeleteMapping("/employees/{userId}")
+    @Operation(summary = "Delete employee", description = "Permanently delete an employee from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Employee deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete employee with active contracts")
+    })
+    public ResponseEntity<Map<String, Object>> deleteEmployee(@PathVariable Integer userId) {
+        adminApplicationService.deleteEmployee(userId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Employee deleted successfully");
+        response.put("timestamp", System.currentTimeMillis());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/employees/{userId}/status")
+    @Operation(summary = "Change employee status", description = "Activate or deactivate an employee")
+    public ResponseEntity<Map<String, String>> changeEmployeeStatus(
+            @PathVariable Integer userId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateEmployee(userId, active);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Employee status changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    // ==============================================
+    // CONTRACT MANAGEMENT
+    // ==============================================
 
     @PostMapping("/contracts")
     @Operation(summary = "Create contract", description = "Create a new contract for an employee")
@@ -218,7 +252,7 @@ public class AdminController {
         return ResponseEntity.ok(contracts);
     }
 
-    @DeleteMapping("/contracts/{contractId}")
+    @PatchMapping("/contracts/{contractId}/terminate")
     @Operation(summary = "Terminate contract", description = "Terminate an active contract")
     public ResponseEntity<Map<String, Object>> terminateContract(@PathVariable Integer contractId) {
         adminApplicationService.terminateContract(contractId);
@@ -230,85 +264,37 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    // Loyalty Level Management Endpoints
-
-    @PostMapping("/loyalty-levels")
-    @Operation(summary = "Create loyalty level", description = "Create a new loyalty level")
+    @DeleteMapping("/contracts/{contractId}")
+    @Operation(summary = "Delete contract", description = "Permanently delete a contract from the system")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Loyalty level created successfully", content = @Content(schema = @Schema(implementation = LoyaltyLevelDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "409", description = "Loyalty level name already exists")
+            @ApiResponse(responseCode = "200", description = "Contract deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Contract not found")
     })
-    public ResponseEntity<LoyaltyLevelDto> createLoyaltyLevel(
-            @Valid @RequestBody CreateLoyaltyLevelRequestDto request) {
-        LoyaltyLevelDto loyaltyLevel = adminApplicationService.createLoyaltyLevel(request);
-        return ResponseEntity.ok(loyaltyLevel);
-    }
+    public ResponseEntity<Map<String, Object>> deleteContract(@PathVariable Integer contractId) {
+        adminApplicationService.deleteContract(contractId);
 
-    @GetMapping("/loyalty-levels")
-    @Operation(summary = "Get loyalty levels", description = "Retrieve all loyalty levels")
-    public ResponseEntity<List<LoyaltyLevelDto>> getLoyaltyLevels() {
-        List<LoyaltyLevelDto> loyaltyLevels = adminApplicationService.getLoyaltyLevels();
-        return ResponseEntity.ok(loyaltyLevels);
-    }
-
-    // System Configuration Endpoints
-
-    @GetMapping("/system-config")
-    @Operation(summary = "Get system configuration", description = "Retrieve all system configuration")
-    public ResponseEntity<List<SystemConfigDto>> getSystemConfig() {
-        List<SystemConfigDto> configs = adminApplicationService.getSystemConfig();
-        return ResponseEntity.ok(configs);
-    }
-
-    @PutMapping("/system-config/{configKey}")
-    @Operation(summary = "Update system configuration", description = "Update a system configuration value")
-    public ResponseEntity<SystemConfigDto> updateSystemConfig(
-            @PathVariable String configKey,
-            @Valid @RequestBody UpdateSystemConfigRequestDto request) {
-        SystemConfigDto config = adminApplicationService.updateSystemConfig(configKey, request);
-        return ResponseEntity.ok(config);
-    }
-
-    // Audit Log Endpoints
-
-    @GetMapping("/audit-log")
-    @Operation(summary = "Get audit log", description = "Retrieve paginated audit log entries")
-    public ResponseEntity<Page<AuditLogDto>> getAuditLog(
-            @RequestParam(required = false) String tableName,
-            @RequestParam(required = false) Integer userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        Page<AuditLogDto> auditLog = adminApplicationService.getAuditLog(
-                tableName, userId, startDate, endDate, pageable);
-        return ResponseEntity.ok(auditLog);
-    }
-
-    // Test endpoints for development
-    @GetMapping("/test/ping")
-    @Operation(summary = "Test admin access", description = "Test endpoint for admin role verification")
-    public ResponseEntity<Map<String, Object>> testAdminAccess(
-            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails) {
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Admin access confirmed");
-        response.put("user", userDetails.getFullName());
-        response.put("role", userDetails.getRole());
+        response.put("message", "Contract deleted successfully");
         response.put("timestamp", System.currentTimeMillis());
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/contract-types")
-    @Operation(summary = "Get contract types", description = "Retrieve all available contract types")
-    public ResponseEntity<List<ContractType>> getContractTypes() {
-        List<ContractType> contractTypes = adminApplicationService.getContractTypes();
-        return ResponseEntity.ok(contractTypes);
+    @PatchMapping("/contracts/{contractId}/status")
+    @Operation(summary = "Change contract status", description = "Activate or deactivate a contract")
+    public ResponseEntity<Map<String, String>> changeContractStatus(
+            @PathVariable Integer contractId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateContract(contractId, active);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Contract status changed successfully");
+        return ResponseEntity.ok(response);
     }
+
+    // ==============================================
+    // ROLE MANAGEMENT
+    // ==============================================
 
     @GetMapping("/roles")
     @Operation(summary = "Get roles", description = "Retrieve all available roles")
@@ -344,7 +330,7 @@ public class AdminController {
         return ResponseEntity.ok(role);
     }
 
-    @DeleteMapping("/roles/{roleId}")
+    @PatchMapping("/roles/{roleId}/deactivate")
     @Operation(summary = "Deactivate role", description = "Deactivate a role (soft delete)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Role deactivated successfully"),
@@ -359,7 +345,17 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    // Contract Type Management
+    // ==============================================
+    // CONTRACT TYPE MANAGEMENT
+    // ==============================================
+
+    @GetMapping("/contract-types")
+    @Operation(summary = "Get contract types", description = "Retrieve all available contract types")
+    public ResponseEntity<List<ContractType>> getContractTypes() {
+        List<ContractType> contractTypes = adminApplicationService.getContractTypes();
+        return ResponseEntity.ok(contractTypes);
+    }
+
     @PostMapping("/contract-types")
     @Operation(summary = "Create new contract type", description = "Create a new contract type in the system")
     @ApiResponses(value = {
@@ -388,7 +384,7 @@ public class AdminController {
         return ResponseEntity.ok(contractType);
     }
 
-    @DeleteMapping("/contract-types/{contractTypeId}")
+    @PatchMapping("/contract-types/{contractTypeId}/deactivate")
     @Operation(summary = "Deactivate contract type", description = "Deactivate a contract type (soft delete)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Contract type deactivated successfully"),
@@ -401,5 +397,73 @@ public class AdminController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Contract type deactivated successfully");
         return ResponseEntity.ok(response);
+    }
+
+    // ==============================================
+    // LOYALTY LEVEL MANAGEMENT
+    // ==============================================
+
+    @PostMapping("/loyalty-levels")
+    @Operation(summary = "Create loyalty level", description = "Create a new loyalty level")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty level created successfully", content = @Content(schema = @Schema(implementation = LoyaltyLevelDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "409", description = "Loyalty level name already exists")
+    })
+    public ResponseEntity<LoyaltyLevelDto> createLoyaltyLevel(
+            @Valid @RequestBody CreateLoyaltyLevelRequestDto request) {
+        LoyaltyLevelDto loyaltyLevel = adminApplicationService.createLoyaltyLevel(request);
+        return ResponseEntity.ok(loyaltyLevel);
+    }
+
+    @GetMapping("/loyalty-levels")
+    @Operation(summary = "Get loyalty levels", description = "Retrieve all loyalty levels")
+    public ResponseEntity<List<LoyaltyLevelDto>> getLoyaltyLevels() {
+        List<LoyaltyLevelDto> loyaltyLevels = adminApplicationService.getLoyaltyLevels();
+        return ResponseEntity.ok(loyaltyLevels);
+    }
+
+    // ==============================================
+    // SYSTEM CONFIGURATION
+    // ==============================================
+
+    @GetMapping("/system-config")
+    @Operation(summary = "Get system configuration", description = "Retrieve all system configuration parameters")
+    public ResponseEntity<List<SystemConfigDto>> getSystemConfig() {
+        List<SystemConfigDto> config = adminApplicationService.getSystemConfig();
+        return ResponseEntity.ok(config);
+    }
+
+    @PutMapping("/system-config/{configKey}")
+    @Operation(summary = "Update system configuration", description = "Update a system configuration parameter")
+    public ResponseEntity<SystemConfigDto> updateSystemConfig(
+            @PathVariable String configKey,
+            @Valid @RequestBody UpdateSystemConfigRequestDto request) {
+        SystemConfigDto config = adminApplicationService.updateSystemConfig(configKey, request);
+        return ResponseEntity.ok(config);
+    }
+
+    // ==============================================
+    // AUDIT LOG
+    // ==============================================
+
+    @GetMapping("/audit-log")
+    @Operation(summary = "Get audit log", description = "Retrieve system audit log with filters")
+    public ResponseEntity<Page<AuditLogDto>> getAuditLog(
+            @RequestParam(required = false) String tableName,
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "operationDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<AuditLogDto> auditLog = adminApplicationService.getAuditLog(tableName, userId, startDate, endDate,
+                pageable);
+        return ResponseEntity.ok(auditLog);
     }
 }

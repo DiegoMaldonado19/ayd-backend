@@ -26,13 +26,20 @@ public class TerminateContractUseCase {
             throw new InvalidCredentialsException("Contract is already terminated");
         }
 
-        if (!contract.isCurrentlyActive()) {
-            throw new InvalidCredentialsException("Contract is not currently active");
+        LocalDate now = LocalDate.now();
+
+        // Validate contract is within active period
+        if (now.isBefore(contract.getStartDate())) {
+            throw new InvalidCredentialsException("Contract has not started yet");
+        }
+
+        if (contract.getEndDate() != null && now.isAfter(contract.getEndDate())) {
+            throw new InvalidCredentialsException("Contract has already expired");
         }
 
         contract.setActive(false);
-        if (contract.getEndDate() == null || contract.getEndDate().isAfter(LocalDate.now())) {
-            contract.setEndDate(LocalDate.now());
+        if (contract.getEndDate() == null || contract.getEndDate().isAfter(now)) {
+            contract.setEndDate(now);
         }
 
         contractRepository.save(contract);

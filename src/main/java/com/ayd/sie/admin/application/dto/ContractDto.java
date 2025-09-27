@@ -70,10 +70,6 @@ public class ContractDto {
     @Schema(description = "Contract status")
     private Boolean active;
 
-    @JsonProperty("is_currently_active")
-    @Schema(description = "Is contract currently active (considering dates)")
-    private Boolean isCurrentlyActive;
-
     @JsonProperty("observations")
     @Schema(description = "Contract observations")
     private String observations;

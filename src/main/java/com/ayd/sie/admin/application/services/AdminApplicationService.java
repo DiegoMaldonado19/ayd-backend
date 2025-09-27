@@ -32,11 +32,15 @@ public class AdminApplicationService {
     // Employee management
     private final RegisterEmployeeUseCase registerEmployeeUseCase;
     private final GetEmployeesUseCase getEmployeesUseCase;
+    private final DeleteEmployeeUseCase deleteEmployeeUseCase;
+    private final ActivateEmployeeUseCase activateEmployeeUseCase;
 
     // Contract management
     private final CreateContractUseCase createContractUseCase;
     private final GetContractsUseCase getContractsUseCase;
     private final TerminateContractUseCase terminateContractUseCase;
+    private final DeleteContractUseCase deleteContractUseCase;
+    private final ActivateContractUseCase activateContractUseCase;
 
     // Loyalty level management
     private final CreateLoyaltyLevelUseCase createLoyaltyLevelUseCase;
@@ -104,6 +108,14 @@ public class AdminApplicationService {
         return getEmployeesUseCase.execute(roleId, search, pageable);
     }
 
+    public void deleteEmployee(Integer userId) {
+        deleteEmployeeUseCase.execute(userId);
+    }
+
+    public void activateEmployee(Integer userId, boolean active) {
+        activateEmployeeUseCase.execute(userId, active);
+    }
+
     // Contract operations
     public ContractDto createContract(CreateContractRequestDto request, Integer adminId) {
         return createContractUseCase.execute(request, adminId);
@@ -115,6 +127,14 @@ public class AdminApplicationService {
 
     public void terminateContract(Integer contractId) {
         terminateContractUseCase.execute(contractId);
+    }
+
+    public void deleteContract(Integer contractId) {
+        deleteContractUseCase.execute(contractId);
+    }
+
+    public void activateContract(Integer contractId, boolean active) {
+        activateContractUseCase.execute(contractId, active);
     }
 
     // Loyalty level operations

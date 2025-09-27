@@ -65,17 +65,4 @@ public class Contract {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public boolean isCurrentlyActive() {
-        if (!Boolean.TRUE.equals(active)) {
-            return false;
-        }
-
-        LocalDate now = LocalDate.now();
-        if (now.isBefore(startDate)) {
-            return false;
-        }
-
-        return endDate == null || !now.isAfter(endDate);
-    }
 }
