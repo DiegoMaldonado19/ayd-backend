@@ -18,110 +18,138 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(
-            InvalidCredentialsException ex, WebRequest request) {
-        log.warn("Invalid credentials attempt: {}", ex.getMessage());
+        @ExceptionHandler(InvalidCredentialsException.class)
+        public ResponseEntity<Map<String, Object>> handleInvalidCredentials(
+                        InvalidCredentialsException ex, WebRequest request) {
+                log.warn("Invalid credentials attempt: {}", ex.getMessage());
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "INVALID_CREDENTIALS",
-                ex.getMessage(),
-                request);
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "INVALID_CREDENTIALS",
+                                ex.getMessage(),
+                                request);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
 
-    @ExceptionHandler(AccountLockedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccountLocked(
-            AccountLockedException ex, WebRequest request) {
-        log.warn("Account locked attempt: {}", ex.getMessage());
+        @ExceptionHandler(AccountLockedException.class)
+        public ResponseEntity<Map<String, Object>> handleAccountLocked(
+                        AccountLockedException ex, WebRequest request) {
+                log.warn("Account locked attempt: {}", ex.getMessage());
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "ACCOUNT_LOCKED",
-                ex.getMessage(),
-                request);
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "ACCOUNT_LOCKED",
+                                ex.getMessage(),
+                                request);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
 
-    @ExceptionHandler(TwoFactorRequiredException.class)
-    public ResponseEntity<Map<String, Object>> handleTwoFactorRequired(
-            TwoFactorRequiredException ex, WebRequest request) {
-        log.info("Two-factor authentication required: {}", ex.getMessage());
+        @ExceptionHandler(TwoFactorRequiredException.class)
+        public ResponseEntity<Map<String, Object>> handleTwoFactorRequired(
+                        TwoFactorRequiredException ex, WebRequest request) {
+                log.info("Two-factor authentication required: {}", ex.getMessage());
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "TWO_FACTOR_REQUIRED",
-                ex.getMessage(),
-                request);
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "TWO_FACTOR_REQUIRED",
+                                ex.getMessage(),
+                                request);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidToken(
-            InvalidTokenException ex, WebRequest request) {
-        log.warn("Invalid token: {}", ex.getMessage());
+        @ExceptionHandler(InvalidTokenException.class)
+        public ResponseEntity<Map<String, Object>> handleInvalidToken(
+                        InvalidTokenException ex, WebRequest request) {
+                log.warn("Invalid token: {}", ex.getMessage());
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "INVALID_TOKEN",
-                ex.getMessage(),
-                request);
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "INVALID_TOKEN",
+                                ex.getMessage(),
+                                request);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(
-            AccessDeniedException ex, WebRequest request) {
-        log.warn("Access denied: {}", ex.getMessage());
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+                        ResourceNotFoundException ex, WebRequest request) {
+                log.warn("Resource not found: {}", ex.getMessage());
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "ACCESS_DENIED",
-                "You don't have permission to access this resource",
-                request);
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "RESOURCE_NOT_FOUND",
+                                ex.getMessage(),
+                                request);
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-    }
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(
-            MethodArgumentNotValidException ex, WebRequest request) {
+        // CAMBIO: Ahora maneja BusinessConstraintViolationException en lugar de
+        // ResourceNotFoundException
+        @ExceptionHandler(BusinessConstraintViolationException.class)
+        public ResponseEntity<Map<String, Object>> handleBusinessConstraint(
+                        BusinessConstraintViolationException ex, WebRequest request) {
+                log.warn("Business constraint violation: {}", ex.getMessage());
 
-        Map<String, String> validationErrors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            validationErrors.put(fieldName, errorMessage);
-        });
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "BUSINESS_CONSTRAINT_VIOLATION",
+                                ex.getMessage(),
+                                request);
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "VALIDATION_ERROR",
-                "Validation failed for one or more fields",
-                request);
-        errorResponse.put("validation_errors", validationErrors);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<Map<String, Object>> handleAccessDenied(
+                        AccessDeniedException ex, WebRequest request) {
+                log.warn("Access denied: {}", ex.getMessage());
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(
-            Exception ex, WebRequest request) {
-        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "ACCESS_DENIED",
+                                "You don't have permission to access this resource",
+                                request);
 
-        Map<String, Object> errorResponse = createErrorResponse(
-                "INTERNAL_SERVER_ERROR",
-                "An unexpected error occurred. Please try again later.",
-                request);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<Map<String, Object>> handleValidationExceptions(
+                        MethodArgumentNotValidException ex, WebRequest request) {
 
-    private Map<String, Object> createErrorResponse(String errorCode, String message, WebRequest request) {
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("error_code", errorCode);
-        errorResponse.put("message", message);
-        errorResponse.put("timestamp", System.currentTimeMillis());
-        errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
-        return errorResponse;
-    }
+                Map<String, String> validationErrors = new HashMap<>();
+                ex.getBindingResult().getAllErrors().forEach((error) -> {
+                        String fieldName = ((FieldError) error).getField();
+                        String errorMessage = error.getDefaultMessage();
+                        validationErrors.put(fieldName, errorMessage);
+                });
+
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "VALIDATION_ERROR",
+                                "Validation failed for one or more fields",
+                                request);
+                errorResponse.put("validation_errors", validationErrors);
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<Map<String, Object>> handleGenericException(
+                        Exception ex, WebRequest request) {
+                log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+
+                Map<String, Object> errorResponse = createErrorResponse(
+                                "INTERNAL_SERVER_ERROR",
+                                "An unexpected error occurred. Please try again later.",
+                                request);
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        private Map<String, Object> createErrorResponse(String errorCode, String message, WebRequest request) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error_code", errorCode);
+                errorResponse.put("message", message);
+                errorResponse.put("timestamp", System.currentTimeMillis());
+                errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
+                return errorResponse;
+        }
 }
