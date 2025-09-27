@@ -2,6 +2,8 @@ package com.ayd.sie.admin.infrastructure.web;
 
 import com.ayd.sie.admin.application.dto.*;
 import com.ayd.sie.admin.application.services.AdminApplicationService;
+import com.ayd.sie.shared.domain.entities.ContractType;
+import com.ayd.sie.shared.domain.entities.Role;
 import com.ayd.sie.shared.infrastructure.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -299,5 +301,19 @@ public class AdminController {
         response.put("timestamp", System.currentTimeMillis());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/contract-types")
+    @Operation(summary = "Get contract types", description = "Retrieve all available contract types")
+    public ResponseEntity<List<ContractType>> getContractTypes() {
+        List<ContractType> contractTypes = getContractTypesUseCase.execute();
+        return ResponseEntity.ok(contractTypes);
+    }
+
+    @GetMapping("/roles")
+    @Operation(summary = "Get roles", description = "Retrieve all available roles")
+    public ResponseEntity<List<Role>> getRoles() {
+        List<Role> roles = getRolesUseCase.execute();
+        return ResponseEntity.ok(roles);
     }
 }

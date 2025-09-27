@@ -2,6 +2,9 @@ package com.ayd.sie.admin.application.services;
 
 import com.ayd.sie.admin.application.dto.*;
 import com.ayd.sie.admin.application.usecases.*;
+import com.ayd.sie.shared.domain.entities.ContractType;
+import com.ayd.sie.shared.domain.entities.Role;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +48,10 @@ public class AdminApplicationService {
 
     // Audit log
     private final GetAuditLogUseCase getAuditLogUseCase;
+
+    // Catalog tables
+    private final GetContractTypesUseCase getContractTypesUseCase;
+    private final GetRolesUseCase getRolesUseCase;
 
     // Branch operations
     public BranchDto createBranch(CreateBranchRequestDto request) {
@@ -125,5 +132,14 @@ public class AdminApplicationService {
             LocalDateTime startDate, LocalDateTime endDate,
             Pageable pageable) {
         return getAuditLogUseCase.execute(tableName, userId, startDate, endDate, pageable);
+    }
+
+    // Catalog tables retrieval
+    public List<ContractType> getContractTypes() {
+        return getContractTypesUseCase.execute();
+    }
+
+    public List<Role> getRoles() {
+        return getRolesUseCase.execute();
     }
 }
