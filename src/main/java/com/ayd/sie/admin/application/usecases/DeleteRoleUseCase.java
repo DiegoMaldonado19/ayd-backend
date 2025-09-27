@@ -1,0 +1,35 @@
+package com.ayd.sie.admin.application.usecases;
+
+import com.ayd.sie.shared.domain.entities.Role;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
+import com.ayd.sie.shared.domain.exceptions.ResourceHasDependenciesException;
+import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
+import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DeleteRoleUseCase {
+
+    private final RoleJpaRepository roleRepository;
+    private final UserJpaRepository userRepository;
+
+    @Transactional
+    public void execute(Integer roleId) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+
+        // Check if role has active users
+        boolean hasActiveUsers = !userRepository.findActiveUsersByRole(roleId).isEmpty();
+        if (hasActiveUsers) {
+            throw new ResourceHasDependenciesException("Cannot delete role with active users");
+        }
+
+        roleRepository.delete(role);
+        log.info("Role permanently deleted with ID: {}", roleId);
+    }
+}

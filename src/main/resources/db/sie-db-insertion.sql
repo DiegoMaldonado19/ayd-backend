@@ -105,40 +105,40 @@ INSERT INTO branches (branch_code, branch_name, address, phone, email, city, sta
 
 -- =====================================================
 -- INSERT USERS
--- Password for all: Admin123! (use real hash in production)
+-- Password for all: Password123$
 -- =====================================================
 
 -- Administrators (Role ID = 1)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id, two_factor_enabled) VALUES
-(1, 'admin.principal@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Carlos Eduardo', 'Martinez Lopez', '55123456', 'Primera Calle 2-34 Zona 1', '2987654321001', TRUE),
-(1, 'admin.secundario@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Maria Isabel', 'Rodriguez Perez', '55234567', 'Segunda Avenida 3-45 Zona 2', '2987654321002', FALSE);
+(1, 'dmaldonado@cari.net', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Carlos Eduardo', 'Martinez Lopez', '55123456', 'Primera Calle 2-34 Zona 1', '2987654321001', TRUE),
+(1, 'admin.secundario@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Maria Isabel', 'Rodriguez Perez', '55234567', 'Segunda Avenida 3-45 Zona 2', '2987654321002', FALSE);
 
 -- Coordinators (Role ID = 2)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id) VALUES
-(2, 'coordinador.zona1@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Juan Pablo', 'Garcia Mendez', '55345678', 'Tercera Calle 4-56 Zona 3', '2987654321003'),
-(2, 'coordinador.zona2@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Ana Lucia', 'Hernandez Ruiz', '55456789', 'Cuarta Avenida 5-67 Zona 4', '2987654321004'),
-(2, 'coordinador.zona3@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Roberto Antonio', 'Flores Castillo', '55567890', 'Quinta Calle 6-78 Zona 5', '2987654321005');
+(2, 'coordinador.zona1@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Juan Pablo', 'Garcia Mendez', '55345678', 'Tercera Calle 4-56 Zona 3', '2987654321003'),
+(2, 'coordinador.zona2@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Ana Lucia', 'Hernandez Ruiz', '55456789', 'Cuarta Avenida 5-67 Zona 4', '2987654321004'),
+(2, 'coordinador.zona3@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Roberto Antonio', 'Flores Castillo', '55567890', 'Quinta Calle 6-78 Zona 5', '2987654321005');
 
 -- Couriers/Delivery Personnel (Role ID = 3)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id) VALUES
-(3, 'repartidor001@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Pedro Antonio', 'Gonzalez Ramirez', '56123456', 'Sexta Avenida 7-89 Zona 6', '2987654321006'),
-(3, 'repartidor002@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Luis Fernando', 'Morales Cruz', '56234567', 'Septima Calle 8-90 Zona 7', '2987654321007'),
-(3, 'repartidor003@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Jose Manuel', 'Diaz Flores', '56345678', 'Octava Avenida 9-01 Zona 8', '2987654321008'),
-(3, 'repartidor004@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Roberto Carlos', 'Vasquez Soto', '56456789', 'Novena Calle 10-12 Zona 9', '2987654321009'),
-(3, 'repartidor005@sie.com.gt', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Miguel Angel', 'Perez Jimenez', '56567890', 'Decima Avenida 11-23 Zona 10', '2987654321010');
+(3, 'repartidor001@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Pedro Antonio', 'Gonzalez Ramirez', '56123456', 'Sexta Avenida 7-89 Zona 6', '2987654321006'),
+(3, 'repartidor002@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Luis Fernando', 'Morales Cruz', '56234567', 'Septima Calle 8-90 Zona 7', '2987654321007'),
+(3, 'repartidor003@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Jose Manuel', 'Diaz Flores', '56345678', 'Octava Avenida 9-01 Zona 8', '2987654321008'),
+(3, 'repartidor004@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Roberto Carlos', 'Vasquez Soto', '56456789', 'Novena Calle 10-12 Zona 9', '2987654321009'),
+(3, 'repartidor005@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Miguel Angel', 'Perez Jimenez', '56567890', 'Decima Avenida 11-23 Zona 10', '2987654321010');
 
 -- Business Users (Role ID = 4)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id) VALUES
-(4, 'tienda.electronica@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Fernando Jose', 'Castillo Mejia', '57123456', 'Once Calle 12-34 Zona 11', '2987654321011'),
-(4, 'boutique.moda@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Patricia Maria', 'Alvarez Torres', '57234567', 'Doce Avenida 13-45 Zona 12', '2987654321012'),
-(4, 'libreria.nacional@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Ricardo Alberto', 'Mendez Silva', '57345678', 'Trece Calle 14-56 Zona 13', '2987654321013'),
-(4, 'farmacia.salud@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxLa', 'Andrea Sofia', 'Lopez Gutierrez', '57456789', 'Catorce Avenida 15-67 Zona 14', '2987654321014');
+(4, 'tienda.electronica@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Fernando Jose', 'Castillo Mejia', '57123456', 'Once Calle 12-34 Zona 11', '2987654321011'),
+(4, 'boutique.moda@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Patricia Maria', 'Alvarez Torres', '57234567', 'Doce Avenida 13-45 Zona 12', '2987654321012'),
+(4, 'libreria.nacional@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Ricardo Alberto', 'Mendez Silva', '57345678', 'Trece Calle 14-56 Zona 13', '2987654321013'),
+(4, 'farmacia.salud@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Andrea Sofia', 'Lopez Gutierrez', '57456789', 'Catorce Avenida 15-67 Zona 14', '2987654321014');
 
 -- Customer Users (Role ID = 5)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id) VALUES
-(5, 'cliente001@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Sofia Alejandra', 'Gutierrez Luna', '58123456', 'Quince Calle 16-78 Zona 15', '2987654321015'),
-(5, 'cliente002@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Diego Alejandro', 'Ramirez Soto', '58234567', 'Dieciseis Avenida 17-89 Zona 16', '2987654321016'),
-(5, 'cliente003@gmail.com', '$2b$12$KIXxPfR8h2JPKzGxQ6P3YO.Y7WJqF.pKBxoUeRu1M5V5TKF8cHxLa', 'Valentina Maria', 'Castro Herrera', '58345678', 'Diecisiete Calle 18-90 Zona 17', '2987654321017');
+(5, 'cliente001@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Sofia Alejandra', 'Gutierrez Luna', '58123456', 'Quince Calle 16-78 Zona 15', '2987654321015'),
+(5, 'cliente002@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Diego Alejandro', 'Ramirez Soto', '58234567', 'Dieciseis Avenida 17-89 Zona 16', '2987654321016'),
+(5, 'cliente003@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Valentina Maria', 'Castro Herrera', '58345678', 'Diecisiete Calle 18-90 Zona 17', '2987654321017');
 
 -- =====================================================
 -- INSERT BUSINESSES
