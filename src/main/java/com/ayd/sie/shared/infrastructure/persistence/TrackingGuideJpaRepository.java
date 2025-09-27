@@ -45,4 +45,18 @@ public interface TrackingGuideJpaRepository extends JpaRepository<TrackingGuide,
     List<TrackingGuide> findByCurrentStateId(@Param("stateId") Integer stateId);
 
     boolean existsByGuideNumber(String guideNumber);
+
+    // Count guides by courier
+    @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId")
+    long countByCourierId(@Param("courierId") Integer courierId);
+
+    @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.isFinal = false")
+    long countActiveByCourierId(@Param("courierId") Integer courierId);
+
+    // Count guides by coordinator
+    @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.coordinator.userId = :coordinatorId")
+    long countByCoordinatorId(@Param("coordinatorId") Integer coordinatorId);
+
+    @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.coordinator.userId = :coordinatorId AND tg.currentState.isFinal = false")
+    long countActiveByCoordinatorId(@Param("coordinatorId") Integer coordinatorId);
 }

@@ -83,7 +83,6 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
-        // CAMBIO: Ahora maneja BusinessConstraintViolationException en lugar de
         // ResourceNotFoundException
         @ExceptionHandler(BusinessConstraintViolationException.class)
         public ResponseEntity<Map<String, Object>> handleBusinessConstraint(
@@ -151,5 +150,19 @@ public class GlobalExceptionHandler {
                 errorResponse.put("timestamp", System.currentTimeMillis());
                 errorResponse.put("path", request.getDescription(false).replace("uri=", ""));
                 return errorResponse;
+        }
+
+        @ExceptionHandler(UserHasDependenciesException.class)
+        public ResponseEntity<Map<String, Object>> handleUserHasDependenciesException(UserHasDependenciesException ex) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("error", "USER_HAS_DEPENDENCIES");
+                response.put("message", ex.getMessage());
+                response.put("timestamp", System.currentTimeMillis());
+
+                if (ex.getReferences() != null) {
+                        response.put("references", ex.getReferences());
+                }
+
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
 }

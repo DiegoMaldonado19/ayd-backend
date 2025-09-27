@@ -40,4 +40,22 @@ public interface ContractJpaRepository extends JpaRepository<Contract, Integer> 
                         +
                         "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
         boolean existsActiveContractsByType(@Param("contractTypeId") Integer contractTypeId);
+
+        // Check ANY contract (active or inactive) with this contract type
+        @Query("SELECT COUNT(c) > 0 FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId")
+        boolean existsAnyContractByType(@Param("contractTypeId") Integer contractTypeId);
+
+        // Count all contracts by type
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId")
+        long countAllByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
+
+        // Count active contracts by type
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true")
+        long countActiveByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
+
+        // Count currently valid contracts by type
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true AND "
+                        +
+                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        long countCurrentlyValidByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
 }

@@ -32,6 +32,7 @@ public class AdminApplicationService {
     private final GetEmployeesUseCase getEmployeesUseCase;
     private final DeleteEmployeeUseCase deleteEmployeeUseCase;
     private final ActivateEmployeeUseCase activateEmployeeUseCase;
+    private final CheckUserReferencesUseCase checkUserReferencesUseCase;
 
     // Contract management
     private final CreateContractUseCase createContractUseCase;
@@ -107,12 +108,16 @@ public class AdminApplicationService {
         return getEmployeesUseCase.execute(roleId, search, pageable);
     }
 
-    public void deleteEmployee(Integer userId) {
-        deleteEmployeeUseCase.execute(userId);
-    }
-
     public void activateEmployee(Integer userId, boolean active) {
         activateEmployeeUseCase.execute(userId, active);
+    }
+
+    public UserReferencesDto checkUserReferences(Integer userId) {
+        return checkUserReferencesUseCase.execute(userId);
+    }
+
+    public void deleteEmployee(Integer userId) {
+        deleteEmployeeUseCase.execute(userId);
     }
 
     // Contract operations

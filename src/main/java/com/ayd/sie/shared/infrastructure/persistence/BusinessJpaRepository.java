@@ -16,11 +16,21 @@ public interface BusinessJpaRepository extends JpaRepository<Business, Integer> 
 
     Optional<Business> findByUserUserIdAndActiveTrue(Integer userId);
 
-    Optional<Business> findByTaxIdAndActiveTrue(String taxId);
-
     List<Business> findByActiveTrue();
 
     Page<Business> findByActiveTrue(Pageable pageable);
+
+    boolean existsByTaxIdAndBusinessIdNotAndActiveTrue(String taxId, Integer businessId);
+
+    @Query("SELECT b FROM Business b JOIN b.currentLevel l WHERE b.active = true AND l.levelId = :levelId")
+    List<Business> findByLoyaltyLevel(@Param("levelId") Integer levelId);
+
+    Optional<Business> findByTaxIdAndActiveTrue(String taxId);
+
+    Optional<Business> findByUserUserId(Integer userId);
+
+    @Query("SELECT b FROM Business b WHERE b.active = true ORDER BY b.businessName")
+    Page<Business> findAllActive(Pageable pageable);
 
     @Query("SELECT b FROM Business b WHERE b.active = true AND " +
             "(LOWER(b.businessName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
@@ -28,10 +38,14 @@ public interface BusinessJpaRepository extends JpaRepository<Business, Integer> 
             "LOWER(b.taxId) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Business> findActiveBySearch(@Param("search") String search, Pageable pageable);
 
+    @Query("SELECT b FROM Business b WHERE b.currentLevel.levelId = :levelId")
+    List<Business> findByCurrentLevelId(@Param("levelId") Integer levelId);
+
     boolean existsByTaxIdAndActiveTrue(String taxId);
 
-    boolean existsByTaxIdAndBusinessIdNotAndActiveTrue(String taxId, Integer businessId);
+    boolean existsByBusinessEmailAndActiveTrue(String businessEmail);
 
-    @Query("SELECT b FROM Business b JOIN b.currentLevel l WHERE b.active = true AND l.levelId = :levelId")
-    List<Business> findByLoyaltyLevel(@Param("levelId") Integer levelId);
+    // Count businesses by loyalty level
+    @Query("SELECT COUNT(b) FROM Business b WHERE b.currentLevel.levelId = :levelId")
+    long countByCurrentLevelLevelId(@Param("levelId") Integer levelId);
 }

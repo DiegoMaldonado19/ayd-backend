@@ -22,13 +22,21 @@ public class DeleteLoyaltyLevelUseCase {
         LoyaltyLevel loyaltyLevel = loyaltyLevelRepository.findById(levelId)
                 .orElseThrow(() -> new InvalidCredentialsException("Loyalty level not found"));
 
-        // Check if loyalty level has active businesses
-        boolean hasActiveBusinesses = !businessRepository.findByLoyaltyLevel(levelId).isEmpty();
-        if (hasActiveBusinesses) {
-            throw new InvalidCredentialsException("Cannot delete loyalty level with active businesses");
+        // Count all businesses with this loyalty level
+        long totalBusinesses = businessRepository.countByCurrentLevelLevelId(levelId);
+
+        log.info("Loyalty level {} has {} businesses associated", levelId, totalBusinesses);
+
+        if (totalBusinesses > 0) {
+            String errorMessage = String.format(
+                    "Cannot delete loyalty level '%s' (ID: %d). It has %d business(es) associated. " +
+                            "Please reassign businesses to another loyalty level before deleting.",
+                    loyaltyLevel.getLevelName(), levelId, totalBusinesses);
+            log.error(errorMessage);
+            throw new InvalidCredentialsException(errorMessage);
         }
 
         loyaltyLevelRepository.delete(loyaltyLevel);
-        log.info("Loyalty level permanently deleted with ID: {}", levelId);
+        log.info("Loyalty level '{}' permanently deleted with ID: {}", loyaltyLevel.getLevelName(), levelId);
     }
 }
