@@ -35,18 +35,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF for stateless JWT authentication
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // Configure CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-
-                // Configure session management - stateless for JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Configure authorization rules
                 .authorizeHttpRequests(authz -> authz
-                        // Public authentication endpoints - DEBE IR PRIMERO Y SER MUY ESPECÍFICO
+                        // Public authentication endpoints
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/verify-2fa").permitAll()
                         .requestMatchers("/auth/refresh-token").permitAll()
@@ -67,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/tracking/public/**").permitAll()
 
-                        // Test endpoints - for development/verification
+                        // Test endpoints
                         .requestMatchers("/admin/test/**").permitAll()
                         .requestMatchers("/coordinator/test/**").permitAll()
                         .requestMatchers("/courier/test/**").permitAll()
@@ -81,11 +74,12 @@ public class SecurityConfig {
                         // Static resources
                         .requestMatchers("/uploads/**").permitAll()
 
-                        // Protected authentication endpoints (require authentication)
+                        // Protected authentication endpoints
                         .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/change-password").authenticated()
                         .requestMatchers("/auth/enable-2fa").authenticated()
-                        .requestMatchers("/auth/disable-2fa").authenticated()
+                        .requestMatchers("/auth/request-disable-2fa").authenticated()
+                        .requestMatchers("/auth/confirm-disable-2fa").authenticated()
                         .requestMatchers("/auth/me").authenticated()
                         .requestMatchers("/auth/sessions").authenticated()
                         .requestMatchers("/auth/revoke-token").authenticated()
@@ -105,11 +99,9 @@ public class SecurityConfig {
                         // All other requests require authentication
                         .anyRequest().authenticated())
 
-                // Exception handling
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                // JWT filter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
