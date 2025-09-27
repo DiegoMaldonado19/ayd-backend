@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -56,11 +57,11 @@ public class AssignmentDto {
 
     @Schema(description = "Base price for the delivery", example = "45.00")
     @JsonProperty("base_price")
-    private Double basePrice;
+    private BigDecimal basePrice;
 
     @Schema(description = "Calculated courier commission", example = "13.50")
     @JsonProperty("courier_commission")
-    private Double courierCommission;
+    private BigDecimal courierCommission;
 
     @Schema(description = "Assignment timestamp", example = "2024-09-27T10:30:00")
     @JsonProperty("assigned_at")

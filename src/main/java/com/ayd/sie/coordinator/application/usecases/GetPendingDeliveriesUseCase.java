@@ -20,56 +20,58 @@ import java.util.List;
 @Slf4j
 public class GetPendingDeliveriesUseCase {
 
-    private final TrackingGuideJpaRepository trackingGuideRepository;
+        private final TrackingGuideJpaRepository trackingGuideRepository;
 
-    @Transactional(readOnly = true)
-    public Page<AssignmentDto> execute(String search, Pageable pageable) {
+        @Transactional(readOnly = true)
+        public Page<AssignmentDto> execute(String search, Pageable pageable) {
 
-        Specification<TrackingGuide> spec = (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
+                Specification<TrackingGuide> spec = (root, query, criteriaBuilder) -> {
+                        List<Predicate> predicates = new ArrayList<>();
 
-            // Only get guides in "Creada" state (pending assignment)
-            predicates.add(criteriaBuilder.equal(root.get("currentState").get("stateName"), "Creada"));
+                        // Only get guides in "Creada" state (pending assignment)
+                        predicates.add(criteriaBuilder.equal(root.get("currentState").get("stateName"), "Creada"));
 
-            // Add search functionality
-            if (search != null && !search.trim().isEmpty()) {
-                String searchPattern = "%" + search.toLowerCase() + "%";
+                        // Add search functionality
+                        if (search != null && !search.trim().isEmpty()) {
+                                String searchPattern = "%" + search.toLowerCase() + "%";
 
-                Predicate guidePredicate = criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("guideNumber")), searchPattern);
+                                Predicate guidePredicate = criteriaBuilder.like(
+                                                criteriaBuilder.lower(root.get("guideNumber")), searchPattern);
 
-                Predicate businessPredicate = criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("business").get("businessName")), searchPattern);
+                                Predicate businessPredicate = criteriaBuilder.like(
+                                                criteriaBuilder.lower(root.get("business").get("businessName")),
+                                                searchPattern);
 
-                Predicate recipientPredicate = criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("recipientName")), searchPattern);
+                                Predicate recipientPredicate = criteriaBuilder.like(
+                                                criteriaBuilder.lower(root.get("recipientName")), searchPattern);
 
-                Predicate addressPredicate = criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("recipientAddress")), searchPattern);
+                                Predicate addressPredicate = criteriaBuilder.like(
+                                                criteriaBuilder.lower(root.get("recipientAddress")), searchPattern);
 
-                predicates.add(criteriaBuilder.or(
-                        guidePredicate, businessPredicate, recipientPredicate, addressPredicate));
-            }
+                                predicates.add(criteriaBuilder.or(
+                                                guidePredicate, businessPredicate, recipientPredicate,
+                                                addressPredicate));
+                        }
 
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+                        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
 
-        Page<TrackingGuide> guides = trackingGuideRepository.findAll(spec, pageable);
+                Page<TrackingGuide> guides = trackingGuideRepository.findAll(spec, pageable);
 
-        return guides.map(this::mapToAssignmentDto);
-    }
+                return guides.map(this::mapToAssignmentDto);
+        }
 
-    private AssignmentDto mapToAssignmentDto(TrackingGuide guide) {
-        return AssignmentDto.builder()
-                .guideId(guide.getGuideId())
-                .guideNumber(guide.getGuideNumber())
-                .businessName(guide.getBusiness().getBusinessName())
-                .recipientName(guide.getRecipientName())
-                .recipientAddress(guide.getRecipientAddress())
-                .basePrice(guide.getBasePrice())
-                .currentState(guide.getCurrentState().getStateName())
-                .observations(guide.getObservations())
-                .assignmentAccepted(false)
-                .build();
-    }
+        private AssignmentDto mapToAssignmentDto(TrackingGuide guide) {
+                return AssignmentDto.builder()
+                                .guideId(guide.getGuideId())
+                                .guideNumber(guide.getGuideNumber())
+                                .businessName(guide.getBusiness().getBusinessName())
+                                .recipientName(guide.getRecipientName())
+                                .recipientAddress(guide.getRecipientAddress())
+                                .basePrice(guide.getBasePrice()) // Cambiado de Double a BigDecimal
+                                .currentState(guide.getCurrentState().getStateName())
+                                .observations(guide.getObservations())
+                                .assignmentAccepted(false)
+                                .build();
+        }
 }

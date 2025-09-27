@@ -180,4 +180,16 @@ public interface TrackingGuideJpaRepository
         @Query("SELECT AVG(TIMESTAMPDIFF(HOUR, tg.createdAt, tg.deliveryDate)) FROM TrackingGuide tg " +
                         "WHERE tg.currentState.stateName = 'Entregada' AND tg.deliveryDate IS NOT NULL")
         Double getAverageDeliveryTimeInHours();
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId")
+        long countByCourierId(@Param("courierId") Integer courierId);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.isFinal = false")
+        long countActiveByCourierId(@Param("courierId") Integer courierId);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.coordinator.userId = :coordinatorId")
+        long countByCoordinatorId(@Param("coordinatorId") Integer coordinatorId);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.coordinator.userId = :coordinatorId AND tg.currentState.isFinal = false")
+        long countActiveByCoordinatorId(@Param("coordinatorId") Integer coordinatorId);
 }

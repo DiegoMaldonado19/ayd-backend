@@ -154,4 +154,19 @@ public interface ContractJpaRepository extends JpaRepository<Contract, Integer>,
                         "LOWER(c.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
                         "LOWER(c.contractType.typeName) LIKE LOWER(CONCAT('%', :search, '%'))")
         Page<Contract> searchContracts(@Param("search") String search, Pageable pageable);
+
+        // Additional methods for DeleteEmployeeUseCase
+        @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId ORDER BY c.createdAt DESC")
+        List<Contract> findByUserUserIdOrderByCreatedAtDesc(@Param("userId") Integer userId);
+
+        // Additional methods for DeleteContractTypeUseCase
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId")
+        long countAllByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
+
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true")
+        long countActiveByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
+
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId " +
+                        "AND c.active = true AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        long countCurrentlyValidByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
 }
