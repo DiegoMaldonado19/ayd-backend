@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DeactivateBranchUseCase {
+public class DeleteBranchUseCase {
 
     private final BranchJpaRepository branchRepository;
 
@@ -20,13 +20,10 @@ public class DeactivateBranchUseCase {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new InvalidCredentialsException("Branch not found"));
 
-        if (!Boolean.TRUE.equals(branch.getActive())) {
-            throw new InvalidCredentialsException("Branch is already inactive");
-        }
+        // Note: Branch deletion validation would need tracking guides entity
+        // For now, we'll allow deletion and rely on database constraints
 
-        branch.setActive(false);
-        branchRepository.save(branch);
-
-        log.info("Branch deactivated successfully with ID: {}", branchId);
+        branchRepository.delete(branch);
+        log.info("Branch permanently deleted with ID: {}", branchId);
     }
 }

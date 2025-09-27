@@ -21,13 +21,11 @@ public class AdminApplicationService {
     private final CreateBranchUseCase createBranchUseCase;
     private final UpdateBranchUseCase updateBranchUseCase;
     private final GetBranchesUseCase getBranchesUseCase;
-    private final DeactivateBranchUseCase deactivateBranchUseCase;
 
     // Business management
     private final RegisterBusinessUseCase registerBusinessUseCase;
     private final UpdateBusinessUseCase updateBusinessUseCase;
     private final GetBusinessesUseCase getBusinessesUseCase;
-    private final SuspendBusinessUseCase suspendBusinessUseCase;
 
     // Employee management
     private final RegisterEmployeeUseCase registerEmployeeUseCase;
@@ -56,14 +54,23 @@ public class AdminApplicationService {
     // Role management
     private final CreateRoleUseCase createRoleUseCase;
     private final UpdateRoleUseCase updateRoleUseCase;
-    private final DeactivateRoleUseCase deactivateRoleUseCase;
     private final GetRolesUseCase getRolesUseCase;
 
     // Contract type management
     private final CreateContractTypeUseCase createContractTypeUseCase;
     private final UpdateContractTypeUseCase updateContractTypeUseCase;
-    private final DeactivateContractTypeUseCase deactivateContractTypeUseCase;
     private final GetContractTypesUseCase getContractTypesUseCase;
+
+    private final DeleteRoleUseCase deleteRoleUseCase;
+    private final ActivateRoleUseCase activateRoleUseCase;
+    private final DeleteContractTypeUseCase deleteContractTypeUseCase;
+    private final ActivateContractTypeUseCase activateContractTypeUseCase;
+    private final DeleteLoyaltyLevelUseCase deleteLoyaltyLevelUseCase;
+    private final ActivateLoyaltyLevelUseCase activateLoyaltyLevelUseCase;
+    private final DeleteBranchUseCase deleteBranchUseCase;
+    private final ActivateBranchUseCase activateBranchUseCase;
+    private final DeleteBusinessUseCase deleteBusinessUseCase;
+    private final ActivateBusinessUseCase activateBusinessUseCase;
 
     // Branch operations
     public BranchDto createBranch(CreateBranchRequestDto request) {
@@ -78,10 +85,6 @@ public class AdminApplicationService {
         return getBranchesUseCase.execute(search, pageable);
     }
 
-    public void deactivateBranch(Integer branchId) {
-        deactivateBranchUseCase.execute(branchId);
-    }
-
     // Business operations
     public BusinessDto registerBusiness(BusinessRegistrationRequestDto request) {
         return registerBusinessUseCase.execute(request);
@@ -93,10 +96,6 @@ public class AdminApplicationService {
 
     public Page<BusinessDto> getBusinesses(String search, Pageable pageable) {
         return getBusinessesUseCase.execute(search, pageable);
-    }
-
-    public void suspendBusiness(Integer businessId) {
-        suspendBusinessUseCase.execute(businessId);
     }
 
     // Employee operations
@@ -171,10 +170,6 @@ public class AdminApplicationService {
         return updateRoleUseCase.execute(roleId, request);
     }
 
-    public void deactivateRole(Integer roleId) {
-        deactivateRoleUseCase.execute(roleId);
-    }
-
     public List<Role> getRoles() {
         return getRolesUseCase.execute();
     }
@@ -188,11 +183,52 @@ public class AdminApplicationService {
         return updateContractTypeUseCase.execute(contractTypeId, request);
     }
 
-    public void deactivateContractType(Integer contractTypeId) {
-        deactivateContractTypeUseCase.execute(contractTypeId);
-    }
-
     public List<ContractType> getContractTypes() {
         return getContractTypesUseCase.execute();
+    }
+
+    // Role operations
+    public void deleteRole(Integer roleId) {
+        deleteRoleUseCase.execute(roleId);
+    }
+
+    public void activateRole(Integer roleId, boolean active) {
+        activateRoleUseCase.execute(roleId, active);
+    }
+
+    // Contract type operations
+    public void deleteContractType(Integer contractTypeId) {
+        deleteContractTypeUseCase.execute(contractTypeId);
+    }
+
+    public void activateContractType(Integer contractTypeId, boolean active) {
+        activateContractTypeUseCase.execute(contractTypeId, active);
+    }
+
+    // Loyalty level operations
+    public void deleteLoyaltyLevel(Integer levelId) {
+        deleteLoyaltyLevelUseCase.execute(levelId);
+    }
+
+    public void activateLoyaltyLevel(Integer levelId, boolean active) {
+        activateLoyaltyLevelUseCase.execute(levelId, active);
+    }
+
+    // Branch operations
+    public void deleteBranch(Integer branchId) {
+        deleteBranchUseCase.execute(branchId);
+    }
+
+    public void activateBranch(Integer branchId, boolean active) {
+        activateBranchUseCase.execute(branchId, active);
+    }
+
+    // Business operations
+    public void deleteBusiness(Integer businessId) {
+        deleteBusinessUseCase.execute(businessId);
+    }
+
+    public void activateBusiness(Integer businessId, boolean active) {
+        activateBusinessUseCase.execute(businessId, active);
     }
 }

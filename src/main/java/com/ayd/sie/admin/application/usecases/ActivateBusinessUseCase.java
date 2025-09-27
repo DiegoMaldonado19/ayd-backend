@@ -11,23 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SuspendBusinessUseCase {
+public class ActivateBusinessUseCase {
 
     private final BusinessJpaRepository businessRepository;
 
     @Transactional
-    public void execute(Integer businessId) {
+    public void execute(Integer businessId, boolean active) {
         Business business = businessRepository.findById(businessId)
                 .orElseThrow(() -> new InvalidCredentialsException("Business not found"));
 
-        if (!Boolean.TRUE.equals(business.getActive())) {
-            throw new InvalidCredentialsException("Business is already suspended");
-        }
-
-        business.setActive(false);
-        business.getUser().setActive(false);
+        business.setActive(active);
+        business.getUser().setActive(active);
         businessRepository.save(business);
 
-        log.info("Business suspended successfully with ID: {}", businessId);
+        log.info("Business {} status changed to: {}", businessId, active ? "ACTIVE" : "INACTIVE");
     }
 }

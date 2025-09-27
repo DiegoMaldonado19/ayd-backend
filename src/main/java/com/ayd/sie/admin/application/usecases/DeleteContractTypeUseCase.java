@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DeactivateContractTypeUseCase {
+public class DeleteContractTypeUseCase {
 
     private final ContractTypeJpaRepository contractTypeRepository;
     private final ContractJpaRepository contractRepository;
@@ -22,18 +22,13 @@ public class DeactivateContractTypeUseCase {
         ContractType contractType = contractTypeRepository.findById(contractTypeId)
                 .orElseThrow(() -> new InvalidCredentialsException("Contract type not found"));
 
-        if (!contractType.getActive()) {
-            throw new InvalidCredentialsException("Contract type is already inactive");
-        }
-
+        // Check if contract type has active contracts
         boolean hasActiveContracts = contractRepository.existsActiveContractsByType(contractTypeId);
         if (hasActiveContracts) {
-            throw new InvalidCredentialsException("Cannot deactivate contract type with active contracts");
+            throw new InvalidCredentialsException("Cannot delete contract type with active contracts");
         }
 
-        contractType.setActive(false);
-        contractTypeRepository.save(contractType);
-
-        log.info("Deactivated contract type: {}", contractType.getTypeName());
+        contractTypeRepository.delete(contractType);
+        log.info("Contract type permanently deleted with ID: {}", contractTypeId);
     }
 }

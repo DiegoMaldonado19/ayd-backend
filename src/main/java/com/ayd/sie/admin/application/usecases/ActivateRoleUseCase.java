@@ -3,7 +3,6 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.shared.domain.entities.Role;
 import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
 import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
-import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,28 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DeactivateRoleUseCase {
+public class ActivateRoleUseCase {
 
     private final RoleJpaRepository roleRepository;
-    private final UserJpaRepository userRepository;
 
     @Transactional
-    public void execute(Integer roleId) {
+    public void execute(Integer roleId, boolean active) {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new InvalidCredentialsException("Role not found"));
 
-        if (!role.getActive()) {
-            throw new InvalidCredentialsException("Role is already inactive");
-        }
-
-        boolean hasActiveUsers = !userRepository.findActiveUsersByRole(roleId).isEmpty();
-        if (hasActiveUsers) {
-            throw new InvalidCredentialsException("Cannot deactivate role with active users assigned");
-        }
-
-        role.setActive(false);
+        role.setActive(active);
         roleRepository.save(role);
 
-        log.info("Deactivated role: {}", role.getRoleName());
+        log.info("Role {} status changed to: {}", roleId, active ? "ACTIVE" : "INACTIVE");
     }
 }

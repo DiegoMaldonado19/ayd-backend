@@ -4,7 +4,8 @@ import com.ayd.sie.admin.application.dto.*;
 import com.ayd.sie.admin.application.services.AdminApplicationService;
 import com.ayd.sie.shared.domain.entities.ContractType;
 import com.ayd.sie.shared.domain.entities.Role;
-import com.ayd.sie.shared.infrastructure.security.CustomUserDetails;
+import com.ayd.sie.shared.infrastructure.config.CustomUserDetails;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -94,11 +94,34 @@ public class AdminController {
 
     @PatchMapping("/branches/{branchId}/status")
     @Operation(summary = "Change branch status", description = "Activate or deactivate a branch")
-    public ResponseEntity<Map<String, String>> changeBranchStatus(@PathVariable Integer branchId) {
-        adminApplicationService.deactivateBranch(branchId);
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Branch status changed successfully"),
+            @ApiResponse(responseCode = "404", description = "Branch not found")
+    })
+    public ResponseEntity<Map<String, String>> changeBranchStatus(
+            @PathVariable Integer branchId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateBranch(branchId, active);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Branch status changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/branches/{branchId}")
+    @Operation(summary = "Delete branch", description = "Permanently delete a branch from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Branch deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Branch not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete branch with active tracking guides")
+    })
+    public ResponseEntity<Map<String, Object>> deleteBranch(@PathVariable Integer branchId) {
+        adminApplicationService.deleteBranch(branchId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Branch deleted successfully");
+        response.put("timestamp", System.currentTimeMillis());
+
         return ResponseEntity.ok(response);
     }
 
@@ -143,13 +166,34 @@ public class AdminController {
         return ResponseEntity.ok(business);
     }
 
-    @PatchMapping("/businesses/{businessId}/suspend")
-    @Operation(summary = "Suspend business", description = "Suspend a business account")
-    public ResponseEntity<Map<String, Object>> suspendBusiness(@PathVariable Integer businessId) {
-        adminApplicationService.suspendBusiness(businessId);
+    @PatchMapping("/businesses/{businessId}/status")
+    @Operation(summary = "Change business status", description = "Activate or deactivate a business")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Business status changed successfully"),
+            @ApiResponse(responseCode = "404", description = "Business not found")
+    })
+    public ResponseEntity<Map<String, String>> changeBusinessStatus(
+            @PathVariable Integer businessId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateBusiness(businessId, active);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Business status changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/businesses/{businessId}")
+    @Operation(summary = "Delete business", description = "Permanently delete a business from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Business deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Business not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete business with active tracking guides")
+    })
+    public ResponseEntity<Map<String, Object>> deleteBusiness(@PathVariable Integer businessId) {
+        adminApplicationService.deleteBusiness(businessId);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Business suspended successfully");
+        response.put("message", "Business deleted successfully");
         response.put("timestamp", System.currentTimeMillis());
 
         return ResponseEntity.ok(response);
@@ -227,7 +271,7 @@ public class AdminController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Contract created successfully", content = @Content(schema = @Schema(implementation = ContractDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "409", description = "Employee already has an active contract")
+            @ApiResponse(responseCode = "404", description = "Employee or contract type not found")
     })
     public ResponseEntity<ContractDto> createContract(
             @Valid @RequestBody CreateContractRequestDto request,
@@ -330,18 +374,36 @@ public class AdminController {
         return ResponseEntity.ok(role);
     }
 
-    @PatchMapping("/roles/{roleId}/deactivate")
-    @Operation(summary = "Deactivate role", description = "Deactivate a role (soft delete)")
+    @PatchMapping("/roles/{roleId}/status")
+    @Operation(summary = "Change role status", description = "Activate or deactivate a role")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Role deactivated successfully"),
-            @ApiResponse(responseCode = "404", description = "Role not found"),
-            @ApiResponse(responseCode = "400", description = "Cannot deactivate role with active users")
+            @ApiResponse(responseCode = "200", description = "Role status changed successfully"),
+            @ApiResponse(responseCode = "404", description = "Role not found")
     })
-    public ResponseEntity<Map<String, String>> deactivateRole(@PathVariable Integer roleId) {
-        adminApplicationService.deactivateRole(roleId);
+    public ResponseEntity<Map<String, String>> changeRoleStatus(
+            @PathVariable Integer roleId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateRole(roleId, active);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Role deactivated successfully");
+        response.put("message", "Role status changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/roles/{roleId}")
+    @Operation(summary = "Delete role", description = "Permanently delete a role from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Role deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Role not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete role with active users")
+    })
+    public ResponseEntity<Map<String, Object>> deleteRole(@PathVariable Integer roleId) {
+        adminApplicationService.deleteRole(roleId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Role deleted successfully");
+        response.put("timestamp", System.currentTimeMillis());
+
         return ResponseEntity.ok(response);
     }
 
@@ -384,18 +446,36 @@ public class AdminController {
         return ResponseEntity.ok(contractType);
     }
 
-    @PatchMapping("/contract-types/{contractTypeId}/deactivate")
-    @Operation(summary = "Deactivate contract type", description = "Deactivate a contract type (soft delete)")
+    @PatchMapping("/contract-types/{contractTypeId}/status")
+    @Operation(summary = "Change contract type status", description = "Activate or deactivate a contract type")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Contract type deactivated successfully"),
-            @ApiResponse(responseCode = "404", description = "Contract type not found"),
-            @ApiResponse(responseCode = "400", description = "Cannot deactivate contract type with active contracts")
+            @ApiResponse(responseCode = "200", description = "Contract type status changed successfully"),
+            @ApiResponse(responseCode = "404", description = "Contract type not found")
     })
-    public ResponseEntity<Map<String, String>> deactivateContractType(@PathVariable Integer contractTypeId) {
-        adminApplicationService.deactivateContractType(contractTypeId);
+    public ResponseEntity<Map<String, String>> changeContractTypeStatus(
+            @PathVariable Integer contractTypeId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateContractType(contractTypeId, active);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Contract type deactivated successfully");
+        response.put("message", "Contract type status changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/contract-types/{contractTypeId}")
+    @Operation(summary = "Delete contract type", description = "Permanently delete a contract type from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract type deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Contract type not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete contract type with active contracts")
+    })
+    public ResponseEntity<Map<String, Object>> deleteContractType(@PathVariable Integer contractTypeId) {
+        adminApplicationService.deleteContractType(contractTypeId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Contract type deleted successfully");
+        response.put("timestamp", System.currentTimeMillis());
+
         return ResponseEntity.ok(response);
     }
 
@@ -417,10 +497,58 @@ public class AdminController {
     }
 
     @GetMapping("/loyalty-levels")
-    @Operation(summary = "Get loyalty levels", description = "Retrieve all loyalty levels")
+    @Operation(summary = "Get loyalty levels", description = "Retrieve all available loyalty levels")
     public ResponseEntity<List<LoyaltyLevelDto>> getLoyaltyLevels() {
         List<LoyaltyLevelDto> loyaltyLevels = adminApplicationService.getLoyaltyLevels();
         return ResponseEntity.ok(loyaltyLevels);
+    }
+
+    @PutMapping("/loyalty-levels/{levelId}")
+    @Operation(summary = "Update loyalty level", description = "Update loyalty level information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty level updated successfully", content = @Content(schema = @Schema(implementation = LoyaltyLevelDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Loyalty level not found"),
+            @ApiResponse(responseCode = "409", description = "Loyalty level name already exists")
+    })
+    public ResponseEntity<LoyaltyLevelDto> updateLoyaltyLevel(
+            @PathVariable Integer levelId,
+            @Valid @RequestBody UpdateLoyaltyLevelRequestDto request) {
+        LoyaltyLevelDto loyaltyLevel = adminApplicationService.updateLoyaltyLevel(levelId, request);
+        return ResponseEntity.ok(loyaltyLevel);
+    }
+
+    @PatchMapping("/loyalty-levels/{levelId}/status")
+    @Operation(summary = "Change loyalty level status", description = "Activate or deactivate a loyalty level")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty level status changed successfully"),
+            @ApiResponse(responseCode = "404", description = "Loyalty level not found")
+    })
+    public ResponseEntity<Map<String, String>> changeLoyaltyLevelStatus(
+            @PathVariable Integer levelId,
+            @RequestParam boolean active) {
+        adminApplicationService.activateLoyaltyLevel(levelId, active);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Loyalty level status changed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/loyalty-levels/{levelId}")
+    @Operation(summary = "Delete loyalty level", description = "Permanently delete a loyalty level from the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty level deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Loyalty level not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot delete loyalty level with active businesses")
+    })
+    public ResponseEntity<Map<String, Object>> deleteLoyaltyLevel(@PathVariable Integer levelId) {
+        adminApplicationService.deleteLoyaltyLevel(levelId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Loyalty level deleted successfully");
+        response.put("timestamp", System.currentTimeMillis());
+
+        return ResponseEntity.ok(response);
     }
 
     // ==============================================
@@ -435,7 +563,7 @@ public class AdminController {
     }
 
     @PutMapping("/system-config/{configKey}")
-    @Operation(summary = "Update system configuration", description = "Update a system configuration parameter")
+    @Operation(summary = "Update system configuration", description = "Update a specific configuration parameter")
     public ResponseEntity<SystemConfigDto> updateSystemConfig(
             @PathVariable String configKey,
             @Valid @RequestBody UpdateSystemConfigRequestDto request) {
@@ -448,22 +576,22 @@ public class AdminController {
     // ==============================================
 
     @GetMapping("/audit-log")
-    @Operation(summary = "Get audit log", description = "Retrieve system audit log with filters")
+    @Operation(summary = "Get audit log", description = "Retrieve system audit log with optional filters")
     public ResponseEntity<Page<AuditLogDto>> getAuditLog(
             @RequestParam(required = false) String tableName,
             @RequestParam(required = false) Integer userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "operationDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(defaultValue = "20") int size) {
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page, size);
 
-        Page<AuditLogDto> auditLog = adminApplicationService.getAuditLog(tableName, userId, startDate, endDate,
-                pageable);
+        LocalDateTime startDateTime = startDate != null ? LocalDateTime.parse(startDate) : null;
+        LocalDateTime endDateTime = endDate != null ? LocalDateTime.parse(endDate) : null;
+
+        Page<AuditLogDto> auditLog = adminApplicationService.getAuditLog(
+                tableName, userId, startDateTime, endDateTime, pageable);
         return ResponseEntity.ok(auditLog);
     }
 }
