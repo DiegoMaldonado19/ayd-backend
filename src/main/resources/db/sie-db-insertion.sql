@@ -110,7 +110,7 @@ INSERT INTO branches (branch_code, branch_name, address, phone, email, city, sta
 
 -- Administrators (Role ID = 1)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id, two_factor_enabled) VALUES
-(1, 'admin.principal@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Carlos Eduardo', 'Martinez Lopez', '55123456', 'Primera Calle 2-34 Zona 1', '2987654321001', TRUE),
+(1, 'dmaldonado@cari.net', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Carlos Eduardo', 'Martinez Lopez', '55123456', 'Primera Calle 2-34 Zona 1', '2987654321001', TRUE),
 (1, 'admin.secundario@sie.com.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Maria Isabel', 'Rodriguez Perez', '55234567', 'Segunda Avenida 3-45 Zona 2', '2987654321002', FALSE);
 
 -- Coordinators (Role ID = 2)
