@@ -15,24 +15,26 @@ import java.util.Optional;
 @Repository
 public interface ContractJpaRepository extends JpaRepository<Contract, Integer> {
 
-    @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId AND c.active = true AND " +
-            "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
-    Optional<Contract> findActiveContractByUserId(@Param("userId") Integer userId);
+        @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId AND c.active = true AND " +
+                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        Optional<Contract> findActiveContractByUserId(@Param("userId") Integer userId);
 
-    List<Contract> findByUserUserIdOrderByCreatedAtDesc(Integer userId);
+        List<Contract> findByUserUserIdOrderByCreatedAtDesc(Integer userId);
 
-    Page<Contract> findByActiveTrue(Pageable pageable);
+        Page<Contract> findByActiveTrue(Pageable pageable);
 
-    @Query("SELECT c FROM Contract c WHERE c.active = true AND " +
-            "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
-    List<Contract> findAllCurrentlyActive();
+        @Query("SELECT c FROM Contract c WHERE c.active = true AND " +
+                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        List<Contract> findAllCurrentlyActive();
 
-    @Query("SELECT c FROM Contract c WHERE c.endDate IS NOT NULL AND c.endDate < :date AND c.active = true")
-    List<Contract> findExpiredContracts(@Param("date") LocalDate date);
+        @Query("SELECT c FROM Contract c WHERE c.endDate IS NOT NULL AND c.endDate < :date AND c.active = true")
+        List<Contract> findExpiredContracts(@Param("date") LocalDate date);
 
-    @Query("SELECT c FROM Contract c JOIN c.user u WHERE c.active = true AND " +
-            "(LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Contract> findActiveBySearch(@Param("search") String search, Pageable pageable);
+        @Query("SELECT c FROM Contract c JOIN c.user u WHERE c.active = true AND " +
+                        "(LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+        Page<Contract> findActiveBySearch(@Param("search") String search, Pageable pageable);
+
+        boolean existsActiveContractsByType(Integer contractTypeId);
 }

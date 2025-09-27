@@ -49,9 +49,17 @@ public class AdminApplicationService {
     // Audit log
     private final GetAuditLogUseCase getAuditLogUseCase;
 
-    // Catalog tables
-    private final GetContractTypesUseCase getContractTypesUseCase;
+    // Role management
+    private final CreateRoleUseCase createRoleUseCase;
+    private final UpdateRoleUseCase updateRoleUseCase;
+    private final DeactivateRoleUseCase deactivateRoleUseCase;
     private final GetRolesUseCase getRolesUseCase;
+
+    // Contract type management
+    private final CreateContractTypeUseCase createContractTypeUseCase;
+    private final UpdateContractTypeUseCase updateContractTypeUseCase;
+    private final DeactivateContractTypeUseCase deactivateContractTypeUseCase;
+    private final GetContractTypesUseCase getContractTypesUseCase;
 
     // Branch operations
     public BranchDto createBranch(CreateBranchRequestDto request) {
@@ -134,12 +142,37 @@ public class AdminApplicationService {
         return getAuditLogUseCase.execute(tableName, userId, startDate, endDate, pageable);
     }
 
-    // Catalog tables retrieval
-    public List<ContractType> getContractTypes() {
-        return getContractTypesUseCase.execute();
+    // Role operations
+    public RoleDto createRole(CreateRoleRequestDto request) {
+        return createRoleUseCase.execute(request);
+    }
+
+    public RoleDto updateRole(Integer roleId, UpdateRoleRequestDto request) {
+        return updateRoleUseCase.execute(roleId, request);
+    }
+
+    public void deactivateRole(Integer roleId) {
+        deactivateRoleUseCase.execute(roleId);
     }
 
     public List<Role> getRoles() {
         return getRolesUseCase.execute();
+    }
+
+    // Contract type operations
+    public ContractTypeDto createContractType(CreateContractTypeRequestDto request) {
+        return createContractTypeUseCase.execute(request);
+    }
+
+    public ContractTypeDto updateContractType(Integer contractTypeId, UpdateContractTypeRequestDto request) {
+        return updateContractTypeUseCase.execute(contractTypeId, request);
+    }
+
+    public void deactivateContractType(Integer contractTypeId) {
+        deactivateContractTypeUseCase.execute(contractTypeId);
+    }
+
+    public List<ContractType> getContractTypes() {
+        return getContractTypesUseCase.execute();
     }
 }

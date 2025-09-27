@@ -306,14 +306,100 @@ public class AdminController {
     @GetMapping("/contract-types")
     @Operation(summary = "Get contract types", description = "Retrieve all available contract types")
     public ResponseEntity<List<ContractType>> getContractTypes() {
-        List<ContractType> contractTypes = getContractTypesUseCase.execute();
+        List<ContractType> contractTypes = adminApplicationService.getContractTypes();
         return ResponseEntity.ok(contractTypes);
     }
 
     @GetMapping("/roles")
     @Operation(summary = "Get roles", description = "Retrieve all available roles")
     public ResponseEntity<List<Role>> getRoles() {
-        List<Role> roles = getRolesUseCase.execute();
+        List<Role> roles = adminApplicationService.getRoles();
         return ResponseEntity.ok(roles);
+    }
+
+    @PostMapping("/roles")
+    @Operation(summary = "Create new role", description = "Create a new role in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Role created successfully", content = @Content(schema = @Schema(implementation = RoleDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "409", description = "Role name already exists")
+    })
+    public ResponseEntity<RoleDto> createRole(@Valid @RequestBody CreateRoleRequestDto request) {
+        RoleDto role = adminApplicationService.createRole(request);
+        return ResponseEntity.ok(role);
+    }
+
+    @PutMapping("/roles/{roleId}")
+    @Operation(summary = "Update role", description = "Update role information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Role updated successfully", content = @Content(schema = @Schema(implementation = RoleDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Role not found"),
+            @ApiResponse(responseCode = "409", description = "Role name already exists")
+    })
+    public ResponseEntity<RoleDto> updateRole(
+            @PathVariable Integer roleId,
+            @Valid @RequestBody UpdateRoleRequestDto request) {
+        RoleDto role = adminApplicationService.updateRole(roleId, request);
+        return ResponseEntity.ok(role);
+    }
+
+    @DeleteMapping("/roles/{roleId}")
+    @Operation(summary = "Deactivate role", description = "Deactivate a role (soft delete)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Role deactivated successfully"),
+            @ApiResponse(responseCode = "404", description = "Role not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot deactivate role with active users")
+    })
+    public ResponseEntity<Map<String, String>> deactivateRole(@PathVariable Integer roleId) {
+        adminApplicationService.deactivateRole(roleId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Role deactivated successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    // Contract Type Management
+    @PostMapping("/contract-types")
+    @Operation(summary = "Create new contract type", description = "Create a new contract type in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract type created successfully", content = @Content(schema = @Schema(implementation = ContractTypeDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "409", description = "Contract type name already exists")
+    })
+    public ResponseEntity<ContractTypeDto> createContractType(
+            @Valid @RequestBody CreateContractTypeRequestDto request) {
+        ContractTypeDto contractType = adminApplicationService.createContractType(request);
+        return ResponseEntity.ok(contractType);
+    }
+
+    @PutMapping("/contract-types/{contractTypeId}")
+    @Operation(summary = "Update contract type", description = "Update contract type information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract type updated successfully", content = @Content(schema = @Schema(implementation = ContractTypeDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Contract type not found"),
+            @ApiResponse(responseCode = "409", description = "Contract type name already exists")
+    })
+    public ResponseEntity<ContractTypeDto> updateContractType(
+            @PathVariable Integer contractTypeId,
+            @Valid @RequestBody UpdateContractTypeRequestDto request) {
+        ContractTypeDto contractType = adminApplicationService.updateContractType(contractTypeId, request);
+        return ResponseEntity.ok(contractType);
+    }
+
+    @DeleteMapping("/contract-types/{contractTypeId}")
+    @Operation(summary = "Deactivate contract type", description = "Deactivate a contract type (soft delete)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract type deactivated successfully"),
+            @ApiResponse(responseCode = "404", description = "Contract type not found"),
+            @ApiResponse(responseCode = "400", description = "Cannot deactivate contract type with active contracts")
+    })
+    public ResponseEntity<Map<String, String>> deactivateContractType(@PathVariable Integer contractTypeId) {
+        adminApplicationService.deactivateContractType(contractTypeId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Contract type deactivated successfully");
+        return ResponseEntity.ok(response);
     }
 }
