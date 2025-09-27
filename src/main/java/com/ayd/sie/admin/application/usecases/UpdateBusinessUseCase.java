@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.BusinessDto;
 import com.ayd.sie.admin.application.dto.UpdateBusinessRequestDto;
 import com.ayd.sie.shared.domain.entities.Business;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.BusinessJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ public class UpdateBusinessUseCase {
     @Transactional
     public BusinessDto execute(Integer businessId, UpdateBusinessRequestDto request) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new InvalidCredentialsException("Business not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         if (!Boolean.TRUE.equals(business.getActive())) {
-            throw new InvalidCredentialsException("Cannot update inactive business");
+            throw new ResourceNotFoundException("Cannot update inactive business");
         }
 
         business.setBusinessName(request.getBusinessName());

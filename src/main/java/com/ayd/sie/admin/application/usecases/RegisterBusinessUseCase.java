@@ -6,7 +6,8 @@ import com.ayd.sie.shared.domain.entities.Business;
 import com.ayd.sie.shared.domain.entities.LoyaltyLevel;
 import com.ayd.sie.shared.domain.entities.Role;
 import com.ayd.sie.shared.domain.entities.User;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import com.ayd.sie.shared.domain.services.NotificationService;
 import com.ayd.sie.shared.infrastructure.persistence.*;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.security.SecureRandom;
 
 @Service
@@ -33,22 +33,22 @@ public class RegisterBusinessUseCase {
     @Transactional
     public BusinessDto execute(BusinessRegistrationRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new InvalidCredentialsException("Email already exists");
+            throw new ResourceNotFoundException("Email already exists");
         }
 
         if (businessRepository.existsByTaxIdAndActiveTrue(request.getTaxId())) {
-            throw new InvalidCredentialsException("Tax ID already exists");
+            throw new ResourceNotFoundException("Tax ID already exists");
         }
 
         if (request.getNationalId() != null && userRepository.existsByNationalId(request.getNationalId())) {
-            throw new InvalidCredentialsException("National ID already exists");
+            throw new ResourceNotFoundException("National ID already exists");
         }
 
         Role businessRole = roleRepository.findByRoleNameAndActiveTrue("Comercio")
-                .orElseThrow(() -> new InvalidCredentialsException("Business role not found"));
+                .orElseThrow(() -> new AccessDeniedException("Business role not found"));
 
         LoyaltyLevel initialLevel = loyaltyLevelRepository.findById(request.getInitialLevelId())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid loyalty level"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid loyalty level"));
 
         String temporaryPassword = generateTemporaryPassword();
         String hashedPassword = passwordEncoder.encode(temporaryPassword);

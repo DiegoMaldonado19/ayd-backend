@@ -1,7 +1,8 @@
 package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.LoyaltyLevel;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
+import com.ayd.sie.shared.domain.exceptions.ResourceHasDependenciesException;
 import com.ayd.sie.shared.infrastructure.persistence.BusinessJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.LoyaltyLevelJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class DeleteLoyaltyLevelUseCase {
     @Transactional
     public void execute(Integer levelId) {
         LoyaltyLevel loyaltyLevel = loyaltyLevelRepository.findById(levelId)
-                .orElseThrow(() -> new InvalidCredentialsException("Loyalty level not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Loyalty level not found"));
 
         // Count all businesses with this loyalty level
         long totalBusinesses = businessRepository.countByCurrentLevelLevelId(levelId);
@@ -33,7 +34,7 @@ public class DeleteLoyaltyLevelUseCase {
                             "Please reassign businesses to another loyalty level before deleting.",
                     loyaltyLevel.getLevelName(), levelId, totalBusinesses);
             log.error(errorMessage);
-            throw new InvalidCredentialsException(errorMessage);
+            throw new ResourceHasDependenciesException(errorMessage);
         }
 
         loyaltyLevelRepository.delete(loyaltyLevel);

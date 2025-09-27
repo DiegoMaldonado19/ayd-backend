@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.BranchDto;
 import com.ayd.sie.admin.application.dto.UpdateBranchRequestDto;
 import com.ayd.sie.shared.domain.entities.Branch;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.BranchJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ public class UpdateBranchUseCase {
     @Transactional
     public BranchDto execute(Integer branchId, UpdateBranchRequestDto request) {
         Branch branch = branchRepository.findById(branchId)
-                .orElseThrow(() -> new InvalidCredentialsException("Branch not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Branch not found"));
 
         if (!Boolean.TRUE.equals(branch.getActive())) {
-            throw new InvalidCredentialsException("Cannot update inactive branch");
+            throw new ResourceNotFoundException("Cannot update inactive branch");
         }
 
         branch.setBranchName(request.getBranchName());

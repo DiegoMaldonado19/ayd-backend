@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.CreateRoleRequestDto;
 import com.ayd.sie.admin.application.dto.RoleDto;
 import com.ayd.sie.shared.domain.entities.Role;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class CreateRoleUseCase {
     @Transactional
     public RoleDto execute(CreateRoleRequestDto request) {
         if (roleRepository.existsByRoleName(request.getRole_name())) {
-            throw new InvalidCredentialsException("Role name already exists");
+            throw new ResourceNotFoundException("Role name already exists");
         }
 
         Role role = Role.builder()

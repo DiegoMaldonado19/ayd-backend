@@ -1,7 +1,7 @@
 package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.User;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ public class ActivateEmployeeUseCase {
     @Transactional
     public void execute(Integer userId, boolean active) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InvalidCredentialsException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         user.setActive(active);
         userRepository.save(user);

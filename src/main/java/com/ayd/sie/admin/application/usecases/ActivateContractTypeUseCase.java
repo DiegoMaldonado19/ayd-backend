@@ -1,7 +1,7 @@
 package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.ContractType;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.ContractTypeJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ public class ActivateContractTypeUseCase {
     @Transactional
     public void execute(Integer contractTypeId, boolean active) {
         ContractType contractType = contractTypeRepository.findById(contractTypeId)
-                .orElseThrow(() -> new InvalidCredentialsException("Contract type not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Contract type not found"));
 
         contractType.setActive(active);
         contractTypeRepository.save(contractType);

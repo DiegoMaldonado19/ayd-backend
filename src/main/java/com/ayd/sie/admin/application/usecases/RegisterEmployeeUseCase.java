@@ -4,13 +4,15 @@ import com.ayd.sie.admin.application.dto.EmployeeDto;
 import com.ayd.sie.admin.application.dto.EmployeeRegistrationRequestDto;
 import com.ayd.sie.shared.domain.entities.Role;
 import com.ayd.sie.shared.domain.entities.User;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.domain.services.NotificationService;
 import com.ayd.sie.shared.infrastructure.persistence.ContractJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,18 +34,18 @@ public class RegisterEmployeeUseCase {
     @Transactional
     public EmployeeDto execute(EmployeeRegistrationRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new InvalidCredentialsException("Email already exists");
+            throw new ResourceNotFoundException("Email already exists");
         }
 
         if (request.getNationalId() != null && userRepository.existsByNationalId(request.getNationalId())) {
-            throw new InvalidCredentialsException("National ID already exists");
+            throw new ResourceNotFoundException("National ID already exists");
         }
 
         Role role = roleRepository.findById(request.getRoleId())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid role"));
+                .orElseThrow(() -> new AccessDeniedException("Invalid role"));
 
         if (!role.getRoleName().equals("Coordinador") && !role.getRoleName().equals("Repartidor")) {
-            throw new InvalidCredentialsException("Can only register Coordinators and Couriers");
+            throw new ResourceNotFoundException("Can only register Coordinators and Couriers");
         }
 
         String temporaryPassword = request.getTemporaryPassword() != null ? request.getTemporaryPassword()

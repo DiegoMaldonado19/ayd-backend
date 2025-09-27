@@ -2,8 +2,8 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.admin.application.dto.UserReferencesDto;
 import com.ayd.sie.shared.domain.entities.User;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
-import com.ayd.sie.shared.domain.exceptions.UserHasDependenciesException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
+import com.ayd.sie.shared.domain.exceptions.ResourceHasDependenciesException;
 import com.ayd.sie.shared.infrastructure.persistence.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class DeleteEmployeeUseCase {
     public void execute(Integer userId) {
         // Find the user
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InvalidCredentialsException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         log.info("Attempting to delete user: {} ({})", user.getFullName(), user.getEmail());
 
@@ -124,7 +124,7 @@ public class DeleteEmployeeUseCase {
 
         if (cannotDelete) {
             errorMessage.append("Please resolve these dependencies before attempting to delete the user.");
-            throw new UserHasDependenciesException(errorMessage.toString(), references);
+            throw new ResourceHasDependenciesException(errorMessage.toString(), references);
         }
     }
 }

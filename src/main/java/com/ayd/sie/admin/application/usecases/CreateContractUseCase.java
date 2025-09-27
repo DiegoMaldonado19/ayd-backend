@@ -5,7 +5,7 @@ import com.ayd.sie.admin.application.dto.CreateContractRequestDto;
 import com.ayd.sie.shared.domain.entities.Contract;
 import com.ayd.sie.shared.domain.entities.ContractType;
 import com.ayd.sie.shared.domain.entities.User;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.ContractJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.ContractTypeJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
@@ -26,30 +26,30 @@ public class CreateContractUseCase {
     @Transactional
     public ContractDto execute(CreateContractRequestDto request, Integer adminId) {
         User employee = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new InvalidCredentialsException("Employee not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
         if (!employee.getRole().getRoleName().equals("Repartidor")) {
-            throw new InvalidCredentialsException("Contracts can only be created for couriers");
+            throw new ResourceNotFoundException("Contracts can only be created for couriers");
         }
 
         if (!Boolean.TRUE.equals(employee.getActive())) {
-            throw new InvalidCredentialsException("Cannot create contract for inactive employee");
+            throw new ResourceNotFoundException("Cannot create contract for inactive employee");
         }
 
         User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new InvalidCredentialsException("Admin not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
 
         ContractType contractType = contractTypeRepository.findById(request.getContractTypeId())
-                .orElseThrow(() -> new InvalidCredentialsException("Contract type not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Contract type not found"));
 
         if (request.getEndDate() != null && request.getEndDate().isBefore(request.getStartDate())) {
-            throw new InvalidCredentialsException("End date cannot be before start date");
+            throw new ResourceNotFoundException("End date cannot be before start date");
         }
 
         // Check if there's already an active contract for this employee
         contractRepository.findActiveContractByUserId(request.getUserId())
                 .ifPresent(existingContract -> {
-                    throw new InvalidCredentialsException("Employee already has an active contract");
+                    throw new ResourceNotFoundException("Employee already has an active contract");
                 });
 
         Contract contract = Contract.builder()

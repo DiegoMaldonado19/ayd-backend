@@ -152,10 +152,11 @@ public class GlobalExceptionHandler {
                 return errorResponse;
         }
 
-        @ExceptionHandler(UserHasDependenciesException.class)
-        public ResponseEntity<Map<String, Object>> handleUserHasDependenciesException(UserHasDependenciesException ex) {
+        @ExceptionHandler(ResourceHasDependenciesException.class)
+        public ResponseEntity<Map<String, Object>> handleUserHasDependenciesException(
+                        ResourceHasDependenciesException ex) {
                 Map<String, Object> response = new HashMap<>();
-                response.put("error", "USER_HAS_DEPENDENCIES");
+                response.put("error", "RESOURCE_HAS_DEPENDENCIES");
                 response.put("message", ex.getMessage());
                 response.put("timestamp", System.currentTimeMillis());
 

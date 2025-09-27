@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.UpdateRoleRequestDto;
 import com.ayd.sie.admin.application.dto.RoleDto;
 import com.ayd.sie.shared.domain.entities.Role;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,15 +20,15 @@ public class UpdateRoleUseCase {
     @Transactional
     public RoleDto execute(Integer roleId, UpdateRoleRequestDto request) {
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new InvalidCredentialsException("Role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
         if (!role.getActive()) {
-            throw new InvalidCredentialsException("Cannot update inactive role");
+            throw new ResourceNotFoundException("Cannot update inactive role");
         }
 
         if (!role.getRoleName().equals(request.getRole_name()) &&
                 roleRepository.existsByRoleName(request.getRole_name())) {
-            throw new InvalidCredentialsException("Role name already exists");
+            throw new ResourceNotFoundException("Role name already exists");
         }
 
         role.setRoleName(request.getRole_name());

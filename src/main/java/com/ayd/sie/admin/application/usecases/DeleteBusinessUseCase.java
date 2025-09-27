@@ -2,7 +2,6 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.Business;
 import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
 import com.ayd.sie.shared.infrastructure.persistence.BusinessJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.TrackingGuideJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public class DeleteBusinessUseCase {
     @Transactional
     public void execute(Integer businessId) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new InvalidCredentialsException("Business not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         validateBusinessCanBeDeleted(businessId, business.getBusinessName());
 

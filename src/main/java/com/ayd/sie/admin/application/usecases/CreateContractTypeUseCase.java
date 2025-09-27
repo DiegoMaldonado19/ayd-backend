@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.CreateContractTypeRequestDto;
 import com.ayd.sie.admin.application.dto.ContractTypeDto;
 import com.ayd.sie.shared.domain.entities.ContractType;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.ContractTypeJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class CreateContractTypeUseCase {
     @Transactional
     public ContractTypeDto execute(CreateContractTypeRequestDto request) {
         if (contractTypeRepository.existsByTypeName(request.getType_name())) {
-            throw new InvalidCredentialsException("Contract type name already exists");
+            throw new ResourceNotFoundException("Contract type name already exists");
         }
 
         ContractType contractType = ContractType.builder()

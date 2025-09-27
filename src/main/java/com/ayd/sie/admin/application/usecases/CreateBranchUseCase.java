@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.BranchDto;
 import com.ayd.sie.admin.application.dto.CreateBranchRequestDto;
 import com.ayd.sie.shared.domain.entities.Branch;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.BranchJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class CreateBranchUseCase {
     @Transactional
     public BranchDto execute(CreateBranchRequestDto request) {
         if (branchRepository.existsByBranchCodeAndActiveTrue(request.getBranchCode())) {
-            throw new InvalidCredentialsException("Branch code already exists");
+            throw new ResourceNotFoundException("Branch code already exists");
         }
 
         Branch branch = Branch.builder()

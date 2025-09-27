@@ -1,7 +1,7 @@
 package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.LoyaltyLevel;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.LoyaltyLevelJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ public class ActivateLoyaltyLevelUseCase {
     @Transactional
     public void execute(Integer levelId, boolean active) {
         LoyaltyLevel loyaltyLevel = loyaltyLevelRepository.findById(levelId)
-                .orElseThrow(() -> new InvalidCredentialsException("Loyalty level not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Loyalty level not found"));
 
         loyaltyLevel.setActive(active);
         loyaltyLevelRepository.save(loyaltyLevel);

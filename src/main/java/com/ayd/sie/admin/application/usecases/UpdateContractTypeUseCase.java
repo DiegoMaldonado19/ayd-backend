@@ -3,7 +3,7 @@ package com.ayd.sie.admin.application.usecases;
 import com.ayd.sie.admin.application.dto.UpdateContractTypeRequestDto;
 import com.ayd.sie.admin.application.dto.ContractTypeDto;
 import com.ayd.sie.shared.domain.entities.ContractType;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.ContractTypeJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,15 +20,15 @@ public class UpdateContractTypeUseCase {
     @Transactional
     public ContractTypeDto execute(Integer contractTypeId, UpdateContractTypeRequestDto request) {
         ContractType contractType = contractTypeRepository.findById(contractTypeId)
-                .orElseThrow(() -> new InvalidCredentialsException("Contract type not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Contract type not found"));
 
         if (!contractType.getActive()) {
-            throw new InvalidCredentialsException("Cannot update inactive contract type");
+            throw new ResourceNotFoundException("Cannot update inactive contract type");
         }
 
         if (!contractType.getTypeName().equals(request.getType_name()) &&
                 contractTypeRepository.existsByTypeName(request.getType_name())) {
-            throw new InvalidCredentialsException("Contract type name already exists");
+            throw new ResourceNotFoundException("Contract type name already exists");
         }
 
         contractType.setTypeName(request.getType_name());

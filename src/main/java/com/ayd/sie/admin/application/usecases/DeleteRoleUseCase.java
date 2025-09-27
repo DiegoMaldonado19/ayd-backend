@@ -1,7 +1,8 @@
 package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.Role;
-import com.ayd.sie.shared.domain.exceptions.InvalidCredentialsException;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
+import com.ayd.sie.shared.domain.exceptions.ResourceHasDependenciesException;
 import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +21,12 @@ public class DeleteRoleUseCase {
     @Transactional
     public void execute(Integer roleId) {
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new InvalidCredentialsException("Role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
         // Check if role has active users
         boolean hasActiveUsers = !userRepository.findActiveUsersByRole(roleId).isEmpty();
         if (hasActiveUsers) {
-            throw new InvalidCredentialsException("Cannot delete role with active users");
+            throw new ResourceHasDependenciesException("Cannot delete role with active users");
         }
 
         roleRepository.delete(role);
