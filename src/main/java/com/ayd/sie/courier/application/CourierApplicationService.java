@@ -17,7 +17,9 @@ import java.util.List;
 public class CourierApplicationService {
 
     private final AcceptAssignmentUseCase acceptAssignmentUseCase;
+    private final RejectAssignmentUseCase rejectAssignmentUseCase;
     private final UpdateDeliveryStateUseCase updateDeliveryStateUseCase;
+    private final UpdateDeliveryStateOnlyUseCase updateDeliveryStateOnlyUseCase;
     private final RegisterEvidenceUseCase registerEvidenceUseCase;
     private final GetCourierDeliveriesUseCase getCourierDeliveriesUseCase;
     private final GetCommissionHistoryUseCase getCommissionHistoryUseCase;
@@ -29,10 +31,22 @@ public class CourierApplicationService {
         return acceptAssignmentUseCase.execute(request, courierId);
     }
 
+    public RejectAssignmentDto rejectAssignment(RejectAssignmentDto request, Integer courierId) {
+        log.info("Processing assignment rejection for courier {} and guide {}", courierId, request.getGuideId());
+        return rejectAssignmentUseCase.execute(request, courierId);
+    }
+
     // State Management
     public CourierDeliveryDto updateDeliveryState(UpdateStateDto request, Integer courierId) {
         log.info("Processing state update for courier {} and guide {}", courierId, request.getGuideId());
         return updateDeliveryStateUseCase.execute(request, courierId);
+    }
+
+    public CourierDeliveryDto updateDeliveryStateOnly(Integer guideId, UpdateDeliveryStateDto request,
+            Integer courierId) {
+        log.info("Updating delivery state only for guide {} to {} by courier {}", guideId, request.getNewState(),
+                courierId);
+        return updateDeliveryStateOnlyUseCase.execute(guideId, request, courierId);
     }
 
     // Evidence Management
@@ -56,6 +70,11 @@ public class CourierApplicationService {
     public List<CourierDeliveryDto> getActiveDeliveries(Integer courierId) {
         log.info("Retrieving active deliveries for courier {}", courierId);
         return getCourierDeliveriesUseCase.getActiveDeliveries(courierId);
+    }
+
+    public List<CourierDeliveryDto> getAssignedDeliveries(Integer courierId) {
+        log.info("Retrieving assigned deliveries (not yet accepted) for courier {}", courierId);
+        return getCourierDeliveriesUseCase.getAssignedDeliveries(courierId);
     }
 
     public List<CourierDeliveryDto> getDeliveriesByState(Integer courierId, String stateName) {

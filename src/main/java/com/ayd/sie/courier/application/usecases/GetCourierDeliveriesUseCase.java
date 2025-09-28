@@ -74,6 +74,32 @@ public class GetCourierDeliveriesUseCase {
     }
 
     @Transactional(readOnly = true)
+    public List<CourierDeliveryDto> getAssignedDeliveries(Integer courierId) {
+        log.info("Getting assigned deliveries (not yet accepted) for courier {}", courierId);
+
+        // 1. Validate courier
+        User courier = userRepository.findById(courierId)
+                .orElseThrow(() -> new ResourceNotFoundException("Courier not found"));
+
+        if (!courier.getRole().getRoleName().equals("Repartidor")) {
+            throw new BusinessConstraintViolationException("Only couriers can access delivery information");
+        }
+
+        // 2. Get deliveries that are assigned but not yet accepted
+        List<TrackingGuide> assignedGuides = trackingGuideRepository.findAll((root, query, criteriaBuilder) -> {
+            return criteriaBuilder.and(
+                    criteriaBuilder.equal(root.get("courier").get("userId"), courierId),
+                    criteriaBuilder.equal(root.get("currentState").get("stateName"), "Asignada"),
+                    criteriaBuilder.equal(root.get("assignmentAccepted"), false));
+        }, Sort.by("assignmentDate").ascending());
+
+        // 3. Map to DTOs
+        return assignedGuides.stream()
+                .map(this::mapToCourierDeliveryDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<CourierDeliveryDto> getDeliveriesByState(Integer courierId, String stateName) {
         log.info("Getting deliveries in state {} for courier {}", stateName, courierId);
 

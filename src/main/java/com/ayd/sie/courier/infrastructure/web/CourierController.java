@@ -2,6 +2,7 @@ package com.ayd.sie.courier.infrastructure.web;
 
 import com.ayd.sie.courier.application.CourierApplicationService;
 import com.ayd.sie.courier.application.dto.*;
+import com.ayd.sie.shared.infrastructure.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/courier")
+@RequestMapping("/courier")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Courier", description = "Courier delivery management operations")
@@ -42,8 +43,26 @@ public class CourierController {
                         @Valid @RequestBody AcceptAssignmentDto request,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 AcceptAssignmentDto result = courierApplicationService.acceptAssignment(request, courierId);
+
+                return ResponseEntity.ok(result);
+        }
+
+        @PostMapping("/assignments/reject")
+        @Operation(summary = "Reject delivery assignment", description = "Allows a courier to reject a delivery assignment")
+        @ApiResponses(value = {
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Assignment rejected successfully"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request data or assignment cannot be rejected"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied - not a courier or assignment not assigned to this courier"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Guide not found")
+        })
+        public ResponseEntity<RejectAssignmentDto> rejectAssignment(
+                        @Valid @RequestBody RejectAssignmentDto request,
+                        Authentication authentication) {
+
+                Integer courierId = SecurityUtils.getCurrentUserId();
+                RejectAssignmentDto result = courierApplicationService.rejectAssignment(request, courierId);
 
                 return ResponseEntity.ok(result);
         }
@@ -60,8 +79,28 @@ public class CourierController {
                         @Valid @RequestBody UpdateStateDto request,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 CourierDeliveryDto result = courierApplicationService.updateDeliveryState(request, courierId);
+
+                return ResponseEntity.ok(result);
+        }
+
+        @PatchMapping("/deliveries/{guideId}/state")
+        @Operation(summary = "Update delivery state only", description = "Updates only the state of a delivery (simpler version)")
+        @ApiResponses(value = {
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "State updated successfully"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid state transition or request data"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied - not assigned to this courier"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Guide not found")
+        })
+        public ResponseEntity<CourierDeliveryDto> updateDeliveryStateOnly(
+                        @Parameter(description = "Guide ID") @PathVariable Integer guideId,
+                        @Valid @RequestBody UpdateDeliveryStateDto request,
+                        Authentication authentication) {
+
+                Integer courierId = SecurityUtils.getCurrentUserId();
+                CourierDeliveryDto result = courierApplicationService.updateDeliveryStateOnly(guideId, request,
+                                courierId);
 
                 return ResponseEntity.ok(result);
         }
@@ -78,7 +117,7 @@ public class CourierController {
                         @Valid @RequestBody EvidenceDto request,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 EvidenceDto result = courierApplicationService.registerEvidence(request, courierId);
 
                 return ResponseEntity.ok(result);
@@ -95,7 +134,7 @@ public class CourierController {
                         @Parameter(description = "Guide ID") @PathVariable Integer guideId,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 List<EvidenceDto> result = courierApplicationService.getGuideEvidence(guideId, courierId);
 
                 return ResponseEntity.ok(result);
@@ -114,7 +153,7 @@ public class CourierController {
                         @Parameter(description = "Sort direction") @RequestParam(defaultValue = "desc") String sortDir,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 Page<CourierDeliveryDto> result = courierApplicationService.getCourierDeliveries(
                                 courierId, page, size, sortBy, sortDir);
 
@@ -130,8 +169,23 @@ public class CourierController {
         public ResponseEntity<List<CourierDeliveryDto>> getActiveDeliveries(
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 List<CourierDeliveryDto> result = courierApplicationService.getActiveDeliveries(courierId);
+
+                return ResponseEntity.ok(result);
+        }
+
+        @GetMapping("/deliveries/assigned")
+        @Operation(summary = "Get assigned deliveries", description = "Retrieves deliveries assigned to the courier that haven't been accepted yet")
+        @ApiResponses(value = {
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Assigned deliveries retrieved successfully"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied - not a courier")
+        })
+        public ResponseEntity<List<CourierDeliveryDto>> getAssignedDeliveries(
+                        Authentication authentication) {
+
+                Integer courierId = SecurityUtils.getCurrentUserId();
+                List<CourierDeliveryDto> result = courierApplicationService.getAssignedDeliveries(courierId);
 
                 return ResponseEntity.ok(result);
         }
@@ -147,7 +201,7 @@ public class CourierController {
                         @Parameter(description = "State name") @PathVariable String stateName,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 List<CourierDeliveryDto> result = courierApplicationService.getDeliveriesByState(courierId, stateName);
 
                 return ResponseEntity.ok(result);
@@ -164,7 +218,7 @@ public class CourierController {
                         @Parameter(description = "Guide ID") @PathVariable Integer guideId,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 CourierDeliveryDto result = courierApplicationService.getDeliveryDetail(guideId, courierId);
 
                 return ResponseEntity.ok(result);
@@ -181,7 +235,7 @@ public class CourierController {
                         @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 CommissionDto result = courierApplicationService.getCommissionHistory(courierId, startDate, endDate);
 
                 return ResponseEntity.ok(result);
@@ -198,7 +252,7 @@ public class CourierController {
                         @Parameter(description = "End date (YYYY-MM-DD)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 BigDecimal result = courierApplicationService.getTotalCommissions(courierId, startDate, endDate);
 
                 return ResponseEntity.ok(result);
@@ -215,7 +269,7 @@ public class CourierController {
                         @Parameter(description = "Month (1-12)") @RequestParam int month,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 BigDecimal result = courierApplicationService.getMonthlyCommissions(courierId, year, month);
 
                 return ResponseEntity.ok(result);
@@ -233,13 +287,9 @@ public class CourierController {
                         @Valid @RequestBody ReportIncidentDto request,
                         Authentication authentication) {
 
-                Integer courierId = getCurrentUserId(authentication);
+                Integer courierId = SecurityUtils.getCurrentUserId();
                 ReportIncidentDto result = courierApplicationService.reportIncident(request, courierId);
 
                 return ResponseEntity.ok(result);
-        }
-
-        private Integer getCurrentUserId(Authentication authentication) {
-                return Integer.parseInt(authentication.getName());
         }
 }
