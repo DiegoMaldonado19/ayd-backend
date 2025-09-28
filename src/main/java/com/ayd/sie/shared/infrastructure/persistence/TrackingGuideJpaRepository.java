@@ -192,4 +192,54 @@ public interface TrackingGuideJpaRepository
 
         @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.coordinator.userId = :coordinatorId AND tg.currentState.isFinal = false")
         long countActiveByCoordinatorId(@Param("coordinatorId") Integer coordinatorId);
+
+        // Additional methods for courier module
+        Page<TrackingGuide> findByCourierUserId(Integer courierId, Pageable pageable);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName IN :stateNames ORDER BY tg.createdAt ASC")
+        List<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameInOrderByCreatedAtAsc(
+                        @Param("courierId") Integer courierId, @Param("stateNames") List<String> stateNames);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName ORDER BY tg.createdAt ASC")
+        List<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameOrderByCreatedAtAsc(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate BETWEEN :startDate AND :endDate")
+        Page<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameAndDeliveryDateBetween(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName,
+                        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate,
+                        Pageable pageable);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate >= :startDate")
+        Page<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameAndDeliveryDateGreaterThanEqual(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName,
+                        @Param("startDate") LocalDateTime startDate, Pageable pageable);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate <= :endDate")
+        Page<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameAndDeliveryDateLessThanEqual(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName,
+                        @Param("endDate") LocalDateTime endDate, Pageable pageable);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName")
+        Page<TrackingGuide> findByCourierUserIdAndCurrentStateStateName(@Param("courierId") Integer courierId,
+                        @Param("stateName") String stateName, Pageable pageable);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate BETWEEN :startDate AND :endDate")
+        List<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameAndDeliveryDateBetween(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName,
+                        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate >= :startDate")
+        List<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameAndDeliveryDateGreaterThanEqual(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName,
+                        @Param("startDate") LocalDateTime startDate);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate <= :endDate")
+        List<TrackingGuide> findByCourierUserIdAndCurrentStateStateNameAndDeliveryDateLessThanEqual(
+                        @Param("courierId") Integer courierId, @Param("stateName") String stateName,
+                        @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName")
+        List<TrackingGuide> findByCourierUserIdAndCurrentStateStateName(@Param("courierId") Integer courierId,
+                        @Param("stateName") String stateName);
 }
