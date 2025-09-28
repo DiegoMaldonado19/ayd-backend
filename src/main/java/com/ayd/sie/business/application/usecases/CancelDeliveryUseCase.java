@@ -23,6 +23,7 @@ public class CancelDeliveryUseCase {
     private final TrackingStateJpaRepository trackingStateRepository;
     private final CancellationTypeJpaRepository cancellationTypeRepository;
     private final CancellationJpaRepository cancellationRepository;
+    private final UserJpaRepository userRepository;
     private final NotificationService notificationService;
 
     @Transactional
@@ -69,7 +70,9 @@ public class CancelDeliveryUseCase {
         TrackingGuide updatedGuide = trackingGuideRepository.save(guide);
 
         // Create cancellation record
-        User businessUser = business.getUser();
+        User businessUser = userRepository.findById(businessId)
+                .orElseThrow(() -> new ResourceNotFoundException("Business user not found"));
+
         Cancellation cancellation = Cancellation.builder()
                 .guide(updatedGuide)
                 .cancelledByUser(businessUser)
