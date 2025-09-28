@@ -5,6 +5,7 @@ import com.ayd.sie.shared.infrastructure.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -39,6 +40,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
+                        // Allow preflight OPTIONS requests for CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Public authentication endpoints
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/verify-2fa").permitAll()
@@ -61,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/tracking/public/**").permitAll()
 
                         // Test endpoints
+                        .requestMatchers("/test/**").permitAll()
                         .requestMatchers("/admin/test/**").permitAll()
                         .requestMatchers("/coordinator/test/**").permitAll()
                         .requestMatchers("/courier/test/**").permitAll()

@@ -133,4 +133,92 @@ public class NotificationServiceImpl implements NotificationService {
                     user.getEmail(), e.getMessage(), e);
         }
     }
+
+    @Override
+    public void sendBusinessNotification(String email, String subject, String message) {
+        try {
+            EmailResponseDto response = emailService.sendSimpleEmail(email, subject, message);
+
+            if (response.isSent()) {
+                log.info("Business notification sent successfully to: {}", email);
+            } else {
+                log.error("Failed to send business notification to: {}. Error: {}",
+                        email, response.getErrorMessage());
+            }
+        } catch (Exception e) {
+            log.error("Exception sending business notification to: {}. Error: {}",
+                    email, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendCourierNotification(String email, String subject, String message) {
+        try {
+            EmailResponseDto response = emailService.sendSimpleEmail(email, subject, message);
+
+            if (response.isSent()) {
+                log.info("Courier notification sent successfully to: {}", email);
+            } else {
+                log.error("Failed to send courier notification to: {}. Error: {}",
+                        email, response.getErrorMessage());
+            }
+        } catch (Exception e) {
+            log.error("Exception sending courier notification to: {}. Error: {}",
+                    email, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendCancellationNotification(String email, String subject, String message, String guideNumber) {
+        try {
+            String fullMessage = String.format("Guía: %s\n\n%s", guideNumber, message);
+            EmailResponseDto response = emailService.sendSimpleEmail(email, subject, fullMessage);
+
+            if (response.isSent()) {
+                log.info("Cancellation notification sent successfully to: {} for guide: {}", email, guideNumber);
+            } else {
+                log.error("Failed to send cancellation notification to: {} for guide: {}. Error: {}",
+                        email, guideNumber, response.getErrorMessage());
+            }
+        } catch (Exception e) {
+            log.error("Exception sending cancellation notification to: {} for guide: {}. Error: {}",
+                    email, guideNumber, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendIncidentNotification(String email, String subject, String message, String guideNumber) {
+        try {
+            String fullMessage = String.format("Guía: %s\n\n%s", guideNumber, message);
+            EmailResponseDto response = emailService.sendSimpleEmail(email, subject, fullMessage);
+
+            if (response.isSent()) {
+                log.info("Incident notification sent successfully to: {} for guide: {}", email, guideNumber);
+            } else {
+                log.error("Failed to send incident notification to: {} for guide: {}. Error: {}",
+                        email, guideNumber, response.getErrorMessage());
+            }
+        } catch (Exception e) {
+            log.error("Exception sending incident notification to: {} for guide: {}. Error: {}",
+                    email, guideNumber, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void sendAssignmentNotification(String email, String subject, String message, String guideNumber) {
+        try {
+            String fullMessage = String.format("Guía: %s\n\n%s", guideNumber, message);
+            EmailResponseDto response = emailService.sendSimpleEmail(email, subject, fullMessage);
+
+            if (response.isSent()) {
+                log.info("Assignment notification sent successfully to: {} for guide: {}", email, guideNumber);
+            } else {
+                log.error("Failed to send assignment notification to: {} for guide: {}. Error: {}",
+                        email, guideNumber, response.getErrorMessage());
+            }
+        } catch (Exception e) {
+            log.error("Exception sending assignment notification to: {} for guide: {}. Error: {}",
+                    email, guideNumber, e.getMessage(), e);
+        }
+    }
 }

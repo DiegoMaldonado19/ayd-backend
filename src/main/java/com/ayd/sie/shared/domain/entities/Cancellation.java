@@ -30,8 +30,9 @@ public class Cancellation {
     @JoinColumn(name = "cancelled_by_user_id", nullable = false)
     private User cancelledByUser;
 
-    @Column(name = "cancellation_type_id", nullable = false)
-    private Integer cancellationTypeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancellation_type_id", nullable = false)
+    private CancellationType cancellationType;
 
     @Column(name = "reason", nullable = false, columnDefinition = "TEXT")
     private String reason;

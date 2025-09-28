@@ -4,58 +4,87 @@ import com.ayd.sie.shared.domain.entities.Contract;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ContractJpaRepository extends JpaRepository<Contract, Integer> {
+public interface ContractJpaRepository extends JpaRepository<Contract, Integer>, JpaSpecificationExecutor<Contract> {
 
-        @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId AND c.active = true AND " +
-                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId " +
+                        "AND c.active = true " +
+                        "AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
         Optional<Contract> findActiveContractByUserId(@Param("userId") Integer userId);
 
-        List<Contract> findByUserUserIdOrderByCreatedAtDesc(Integer userId);
+        // Add the missing method for checking active contracts on a specific date
+        @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Contract c WHERE c.user.userId = :userId " +
+                        "AND c.active = true " +
+                        "AND :date BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        boolean hasActiveContractOnDate(@Param("userId") Integer userId, @Param("date") LocalDate date);
 
-        Page<Contract> findByActiveTrue(Pageable pageable);
+        @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId ORDER BY c.createdAt DESC")
+        List<Contract> findByUserId(@Param("userId") Integer userId);
 
-        @Query("SELECT c FROM Contract c WHERE c.active = true AND " +
-                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
-        List<Contract> findAllCurrentlyActive();
-
-        @Query("SELECT c FROM Contract c WHERE c.endDate IS NOT NULL AND c.endDate < :date AND c.active = true")
-        List<Contract> findExpiredContracts(@Param("date") LocalDate date);
-
-        @Query("SELECT c FROM Contract c JOIN c.user u WHERE c.active = true AND " +
-                        "(LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+        // Add this method for GetContractsUseCase - search with active filter
+        @Query("SELECT c FROM Contract c WHERE c.active = true AND (" +
+                        "LOWER(c.user.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(c.user.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(c.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(c.contractType.typeName) LIKE LOWER(CONCAT('%', :search, '%')))")
         Page<Contract> findActiveBySearch(@Param("search") String search, Pageable pageable);
 
-        @Query("SELECT COUNT(c) > 0 FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true AND "
-                        +
-                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
-        boolean existsActiveContractsByType(@Param("contractTypeId") Integer contractTypeId);
+        // Add this method for GetContractsUseCase - find all active contracts with
+        // pagination
+        Page<Contract> findByActiveTrue(Pageable pageable);
 
-        // Check ANY contract (active or inactive) with this contract type
-        @Query("SELECT COUNT(c) > 0 FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId")
-        boolean existsAnyContractByType(@Param("contractTypeId") Integer contractTypeId);
+        // Active contract counts
+        @Query("SELECT COUNT(DISTINCT c.user.userId) FROM Contract c " +
+                        "WHERE c.active = true " +
+                        "AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        long countCouriersWithActiveContracts();
 
-        // Count all contracts by type
+        @Query("SELECT COUNT(c) FROM Contract c " +
+                        "WHERE c.active = true " +
+                        "AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        long countActiveContracts();
+
+        @Query("SELECT COUNT(c) FROM Contract c " +
+                        "WHERE c.user.role.roleId = :roleId " +
+                        "AND c.active = true " +
+                        "AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        long countActiveContractsByRoleId(@Param("roleId") Integer roleId);
+
+        @Query("SELECT COUNT(u) FROM User u WHERE u.role.roleId = :roleId " +
+                        "AND u.active = true " +
+                        "AND u.userId NOT IN (SELECT c.user.userId FROM Contract c " +
+                        "WHERE c.active = true " +
+                        "AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31'))")
+        long countCouriersWithoutActiveContract(@Param("roleId") Integer roleId);
+
+        // Search contracts
+        @Query("SELECT c FROM Contract c WHERE " +
+                        "LOWER(c.user.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(c.user.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(c.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(c.contractType.typeName) LIKE LOWER(CONCAT('%', :search, '%'))")
+        Page<Contract> searchContracts(@Param("search") String search, Pageable pageable);
+
+        // Additional methods for DeleteEmployeeUseCase
+        @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId ORDER BY c.createdAt DESC")
+        List<Contract> findByUserUserIdOrderByCreatedAtDesc(@Param("userId") Integer userId);
+
+        // Additional methods for DeleteContractTypeUseCase
         @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId")
         long countAllByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
 
-        // Count active contracts by type
         @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true")
         long countActiveByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
 
-        // Count currently valid contracts by type
-        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId AND c.active = true AND "
-                        +
-                        "CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
+        @Query("SELECT COUNT(c) FROM Contract c WHERE c.contractType.contractTypeId = :contractTypeId " +
+                        "AND c.active = true AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31')")
         long countCurrentlyValidByContractTypeId(@Param("contractTypeId") Integer contractTypeId);
 }

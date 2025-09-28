@@ -12,17 +12,27 @@ import java.util.Optional;
 @Repository
 public interface LoyaltyLevelJpaRepository extends JpaRepository<LoyaltyLevel, Integer> {
 
-    List<LoyaltyLevel> findByActiveTrueOrderByMinDeliveries();
+    List<LoyaltyLevel> findByActiveTrueOrderByLevelName();
 
     Optional<LoyaltyLevel> findByLevelNameAndActiveTrue(String levelName);
 
-    @Query("SELECT l FROM LoyaltyLevel l WHERE l.active = true AND " +
-            ":deliveries >= l.minDeliveries AND " +
-            "(l.maxDeliveries IS NULL OR :deliveries <= l.maxDeliveries) " +
-            "ORDER BY l.minDeliveries DESC LIMIT 1")
-    Optional<LoyaltyLevel> findLevelByDeliveryCount(@Param("deliveries") Integer deliveries);
-
     boolean existsByLevelNameAndActiveTrue(String levelName);
 
-    boolean existsByLevelNameAndLevelIdNotAndActiveTrue(String levelName, Integer levelId);
+    @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.active = :active ORDER BY ll.levelName")
+    List<LoyaltyLevel> findByActive(@Param("active") Boolean active);
+
+    @Query("SELECT COUNT(ll) FROM LoyaltyLevel ll WHERE ll.active = true")
+    long countActiveLevels();
+
+    @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.minDeliveries <= :deliveryCount AND ll.active = true ORDER BY ll.minDeliveries DESC")
+    List<LoyaltyLevel> findEligibleLevels(@Param("deliveryCount") Integer deliveryCount);
+
+    Optional<LoyaltyLevel> findByLevelName(String levelName);
+
+    List<LoyaltyLevel> findByActiveTrueOrderByMinDeliveries();
+
+    @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.minDeliveries <= :deliveries ORDER BY ll.minDeliveries DESC")
+    List<LoyaltyLevel> findApplicableLevels(@Param("deliveries") Integer deliveries);
+
+    boolean existsByLevelName(String levelName);
 }

@@ -15,53 +15,37 @@ public class CorsConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // Allow specific origins for development and production
+                // Permitir orígenes específicos - desarrollo y producción
                 configuration.setAllowedOriginPatterns(Arrays.asList(
-                                // Local development - Postman testing
+                                // Desarrollo local
                                 "http://localhost:*",
                                 "http://127.0.0.1:*",
-
-                                // Angular development server (puerto 4200 específico)
-                                "http://localhost:4200",
-                                "http://127.0.0.1:4200",
-
-                                // Azure production server HTTP/HTTPS
+                                
+                                // Servidor de producción
                                 "http://20.55.81.100:*",
-                                "https://20.55.81.100:*",
+                                "https://20.55.81.100:*"));
 
-                                // Docker internal network communication
-                                "http://sie_backend:*",
-                                "http://app:*"));
-
-                // Allow all standard HTTP methods
+                // Métodos HTTP permitidos
                 configuration.setAllowedMethods(Arrays.asList(
                                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-                // Allow all headers typically used by Angular applications
-                configuration.setAllowedHeaders(Arrays.asList(
-                                "Authorization",
-                                "Content-Type",
-                                "X-Requested-With",
-                                "Accept",
-                                "Origin",
-                                "Access-Control-Request-Method",
-                                "Access-Control-Request-Headers",
-                                "X-CSRF-TOKEN"));
+                // Permitir todos los headers
+                configuration.setAllowedHeaders(Arrays.asList("*"));
 
-                // Expose headers that might be needed by the frontend
+                // Exponer headers necesarios
                 configuration.setExposedHeaders(Arrays.asList(
                                 "Authorization",
-                                "Content-Disposition",
+                                "Content-Type",
                                 "X-Total-Count"));
 
-                // Allow credentials (cookies, authorization headers, TLS client certificates)
+                // Permitir credenciales
                 configuration.setAllowCredentials(true);
 
-                // Cache preflight response for 1 hour
+                // Cache de preflight por 1 hora
                 configuration.setMaxAge(3600L);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration("/api/v1/**", configuration);
+                source.registerCorsConfiguration("/**", configuration);
 
                 return source;
         }
