@@ -34,6 +34,11 @@ public class UpdateContractTypeUseCase {
         contractType.setTypeName(request.getType_name());
         contractType.setDescription(request.getDescription());
 
+        // Update active status if provided
+        if (request.getActive() != null) {
+            contractType.setActive(request.getActive());
+        }
+
         ContractType savedContractType = contractTypeRepository.save(contractType);
         log.info("Updated contract type: {}", savedContractType.getTypeName());
 

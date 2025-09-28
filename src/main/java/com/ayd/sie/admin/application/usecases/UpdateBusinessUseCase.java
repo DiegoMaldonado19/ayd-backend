@@ -33,6 +33,11 @@ public class UpdateBusinessUseCase {
         business.setBusinessEmail(request.getBusinessEmail());
         business.setSupportContact(request.getSupportContact());
 
+        // Update active status if provided
+        if (request.getActive() != null) {
+            business.setActive(request.getActive());
+        }
+
         Business savedBusiness = businessRepository.save(business);
 
         log.info("Business updated successfully with ID: {}", businessId);
