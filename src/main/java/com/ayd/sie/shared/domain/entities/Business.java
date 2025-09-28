@@ -69,4 +69,13 @@ public class Business {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Helper methods
+    public LoyaltyLevel getLoyaltyLevel() {
+        return this.currentLevel;
+    }
+
+    public String getEmail() {
+        return this.businessEmail != null ? this.businessEmail : (this.user != null ? this.user.getEmail() : null);
+    }
 }

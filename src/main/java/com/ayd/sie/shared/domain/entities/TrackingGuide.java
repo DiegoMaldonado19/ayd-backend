@@ -99,4 +99,9 @@ public class TrackingGuide {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Helper method
+    public User getAssignedCourier() {
+        return this.courier;
+    }
 }
