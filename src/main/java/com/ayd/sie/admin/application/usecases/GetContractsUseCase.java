@@ -2,6 +2,7 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.admin.application.dto.ContractDto;
 import com.ayd.sie.shared.domain.entities.Contract;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.ContractJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,13 @@ public class GetContractsUseCase {
         }
 
         return contracts.map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public ContractDto findById(Integer contractId) {
+        Contract contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contract not found with id: " + contractId));
+        return mapToDto(contract);
     }
 
     private ContractDto mapToDto(Contract contract) {
