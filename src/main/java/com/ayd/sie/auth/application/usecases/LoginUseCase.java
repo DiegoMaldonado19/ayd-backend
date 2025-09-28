@@ -166,9 +166,14 @@ public class LoginUseCase {
         return LoginResponseDto.UserInfoDto.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .fullName(user.getFullName())
+                .phone(user.getPhone())
                 .role(user.getRole().getRoleName())
                 .twoFactorEnabled(user.isTwoFactorRequired())
+                .lastLogin(user.getLastLogin())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }
