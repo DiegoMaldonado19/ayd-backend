@@ -242,4 +242,23 @@ public interface TrackingGuideJpaRepository
         @Query("SELECT tg FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName")
         List<TrackingGuide> findByCourierUserIdAndCurrentStateStateName(@Param("courierId") Integer courierId,
                         @Param("stateName") String stateName);
+
+        // Methods with JOIN FETCH to avoid LazyInitializationException
+        @Query("SELECT DISTINCT tg FROM TrackingGuide tg " +
+                        "LEFT JOIN FETCH tg.business " +
+                        "LEFT JOIN FETCH tg.originBranch " +
+                        "LEFT JOIN FETCH tg.courier " +
+                        "LEFT JOIN FETCH tg.coordinator " +
+                        "LEFT JOIN FETCH tg.currentState " +
+                        "WHERE tg.business.businessId = :businessId")
+        List<TrackingGuide> findByBusinessBusinessIdWithFetch(@Param("businessId") Integer businessId);
+
+        @Query("SELECT DISTINCT tg FROM TrackingGuide tg " +
+                        "LEFT JOIN FETCH tg.business " +
+                        "LEFT JOIN FETCH tg.originBranch " +
+                        "LEFT JOIN FETCH tg.courier " +
+                        "LEFT JOIN FETCH tg.coordinator " +
+                        "LEFT JOIN FETCH tg.currentState " +
+                        "WHERE tg.business.businessId = :businessId AND tg.currentState.isFinal = false")
+        List<TrackingGuide> findActiveByBusinessIdWithFetch(@Param("businessId") Integer businessId);
 }

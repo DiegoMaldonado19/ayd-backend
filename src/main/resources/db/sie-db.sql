@@ -562,18 +562,19 @@ BEGIN
     END IF;
 END//
 
--- Trigger: Record state changes in history
-CREATE TRIGGER trg_record_state_history
-AFTER UPDATE ON tracking_guides
-FOR EACH ROW
-BEGIN
-    IF NEW.current_state_id != OLD.current_state_id THEN
-        INSERT INTO state_history (guide_id, state_id, user_id, observations)
-        VALUES (NEW.guide_id, NEW.current_state_id, 
-                IFNULL(NEW.courier_id, NEW.coordinator_id),
-                'Cambio de estado registrado');
-    END IF;
-END//
+-- Trigger: Record state changes in history - DISABLED: Handled by application code
+-- This trigger was causing issues when user_id was null, so state history is now managed by Java code
+-- CREATE TRIGGER trg_record_state_history
+-- AFTER UPDATE ON tracking_guides
+-- FOR EACH ROW
+-- BEGIN
+--     IF NEW.current_state_id != OLD.current_state_id THEN
+--         INSERT INTO state_history (guide_id, state_id, user_id, observations)
+--         VALUES (NEW.guide_id, NEW.current_state_id, 
+--                 IFNULL(NEW.courier_id, NEW.coordinator_id),
+--                 'Cambio de estado registrado');
+--     END IF;
+-- END//
 
 -- Trigger: Send notifications on state changes
 CREATE TRIGGER trg_send_notifications
@@ -659,22 +660,22 @@ BEGIN
             SET NEW.penalty_amount = NEW.courier_commission;
         END IF;
         
-        -- Update to Cancelled state (ID=6)
-        UPDATE tracking_guides 
-        SET current_state_id = 6,
-            cancellation_date = NOW(),
-            updated_at = NOW()
-        WHERE guide_id = NEW.guide_id;
+        -- Update to Cancelled state (ID=6) - COMMENTED OUT: Handled by application code
+        -- UPDATE tracking_guides 
+        -- SET current_state_id = 6,
+        --     cancellation_date = NOW(),
+        --     updated_at = NOW()
+        -- WHERE guide_id = NEW.guide_id;
     ELSE
-        -- Customer cancellation (ID=2), update to Rejected state (ID=7)
+        -- Customer cancellation (ID=2), update to Rejected state (ID=7) - COMMENTED OUT: Handled by application code
         SET NEW.penalty_amount = 0;
         SET NEW.courier_commission = IFNULL(base_commission, 0);
         
-        UPDATE tracking_guides 
-        SET current_state_id = 7,
-            cancellation_date = NOW(),
-            updated_at = NOW()
-        WHERE guide_id = NEW.guide_id;
+        -- UPDATE tracking_guides 
+        -- SET current_state_id = 7,
+        --     cancellation_date = NOW(),
+        --     updated_at = NOW()
+        -- WHERE guide_id = NEW.guide_id;
     END IF;
 END//
 
