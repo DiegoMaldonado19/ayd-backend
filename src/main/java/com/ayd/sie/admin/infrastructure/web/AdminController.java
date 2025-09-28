@@ -83,6 +83,17 @@ public class AdminController {
         return ResponseEntity.ok(branches);
     }
 
+    @GetMapping("/branches/{branchId}")
+    @Operation(summary = "Get branch by ID", description = "Retrieve specific branch information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Branch found successfully", content = @Content(schema = @Schema(implementation = BranchDto.class))),
+            @ApiResponse(responseCode = "404", description = "Branch not found")
+    })
+    public ResponseEntity<BranchDto> getBranchById(@PathVariable Integer branchId) {
+        BranchDto branch = adminApplicationService.getBranchById(branchId);
+        return ResponseEntity.ok(branch);
+    }
+
     @PutMapping("/branches/{branchId}")
     @Operation(summary = "Update branch", description = "Update branch information")
     public ResponseEntity<BranchDto> updateBranch(
@@ -155,6 +166,17 @@ public class AdminController {
 
         Page<BusinessDto> businesses = adminApplicationService.getBusinesses(search, pageable);
         return ResponseEntity.ok(businesses);
+    }
+
+    @GetMapping("/businesses/{businessId}")
+    @Operation(summary = "Get business by ID", description = "Retrieve specific business information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Business found successfully", content = @Content(schema = @Schema(implementation = BusinessDto.class))),
+            @ApiResponse(responseCode = "404", description = "Business not found")
+    })
+    public ResponseEntity<BusinessDto> getBusinessById(@PathVariable Integer businessId) {
+        BusinessDto business = adminApplicationService.getBusinessById(businessId);
+        return ResponseEntity.ok(business);
     }
 
     @PutMapping("/businesses/{businessId}")
@@ -233,6 +255,17 @@ public class AdminController {
         return ResponseEntity.ok(employees);
     }
 
+    @GetMapping("/employees/{userId}")
+    @Operation(summary = "Get employee by ID", description = "Retrieve specific employee information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Employee found successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "404", description = "Employee not found")
+    })
+    public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer userId) {
+        EmployeeDto employee = adminApplicationService.getEmployeeById(userId);
+        return ResponseEntity.ok(employee);
+    }
+
     @PatchMapping("/employees/{userId}/status")
     @Operation(summary = "Change employee status", description = "Activate or deactivate an employee")
     public ResponseEntity<Map<String, String>> changeEmployeeStatus(
@@ -307,6 +340,17 @@ public class AdminController {
         return ResponseEntity.ok(contracts);
     }
 
+    @GetMapping("/contracts/{contractId}")
+    @Operation(summary = "Get contract by ID", description = "Retrieve specific contract information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract found successfully", content = @Content(schema = @Schema(implementation = ContractDto.class))),
+            @ApiResponse(responseCode = "404", description = "Contract not found")
+    })
+    public ResponseEntity<ContractDto> getContractById(@PathVariable Integer contractId) {
+        ContractDto contract = adminApplicationService.getContractById(contractId);
+        return ResponseEntity.ok(contract);
+    }
+
     @PatchMapping("/contracts/{contractId}/terminate")
     @Operation(summary = "Terminate contract", description = "Terminate an active contract")
     public ResponseEntity<Map<String, Object>> terminateContract(@PathVariable Integer contractId) {
@@ -356,6 +400,17 @@ public class AdminController {
     public ResponseEntity<List<Role>> getRoles() {
         List<Role> roles = adminApplicationService.getRoles();
         return ResponseEntity.ok(roles);
+    }
+
+    @GetMapping("/roles/{roleId}")
+    @Operation(summary = "Get role by ID", description = "Retrieve specific role information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Role found successfully", content = @Content(schema = @Schema(implementation = Role.class))),
+            @ApiResponse(responseCode = "404", description = "Role not found")
+    })
+    public ResponseEntity<Role> getRoleById(@PathVariable Integer roleId) {
+        Role role = adminApplicationService.getRoleById(roleId);
+        return ResponseEntity.ok(role);
     }
 
     @PostMapping("/roles")
@@ -427,6 +482,17 @@ public class AdminController {
     public ResponseEntity<List<ContractType>> getContractTypes() {
         List<ContractType> contractTypes = adminApplicationService.getContractTypes();
         return ResponseEntity.ok(contractTypes);
+    }
+
+    @GetMapping("/contract-types/{contractTypeId}")
+    @Operation(summary = "Get contract type by ID", description = "Retrieve specific contract type information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract type found successfully", content = @Content(schema = @Schema(implementation = ContractType.class))),
+            @ApiResponse(responseCode = "404", description = "Contract type not found")
+    })
+    public ResponseEntity<ContractType> getContractTypeById(@PathVariable Integer contractTypeId) {
+        ContractType contractType = adminApplicationService.getContractTypeById(contractTypeId);
+        return ResponseEntity.ok(contractType);
     }
 
     @PostMapping("/contract-types")
@@ -512,6 +578,17 @@ public class AdminController {
     public ResponseEntity<List<LoyaltyLevelDto>> getLoyaltyLevels() {
         List<LoyaltyLevelDto> loyaltyLevels = adminApplicationService.getLoyaltyLevels();
         return ResponseEntity.ok(loyaltyLevels);
+    }
+
+    @GetMapping("/loyalty-levels/{levelId}")
+    @Operation(summary = "Get loyalty level by ID", description = "Retrieve specific loyalty level information by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty level found successfully", content = @Content(schema = @Schema(implementation = LoyaltyLevelDto.class))),
+            @ApiResponse(responseCode = "404", description = "Loyalty level not found")
+    })
+    public ResponseEntity<LoyaltyLevelDto> getLoyaltyLevelById(@PathVariable Integer levelId) {
+        LoyaltyLevelDto loyaltyLevel = adminApplicationService.getLoyaltyLevelById(levelId);
+        return ResponseEntity.ok(loyaltyLevel);
     }
 
     @PatchMapping("/loyalty-levels/{levelId}/status")

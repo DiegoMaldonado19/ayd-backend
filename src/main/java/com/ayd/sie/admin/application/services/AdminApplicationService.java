@@ -86,6 +86,10 @@ public class AdminApplicationService {
         return getBranchesUseCase.execute(search, pageable);
     }
 
+    public BranchDto getBranchById(Integer branchId) {
+        return getBranchesUseCase.findById(branchId);
+    }
+
     // Business operations
     public BusinessDto registerBusiness(BusinessRegistrationRequestDto request) {
         return registerBusinessUseCase.execute(request);
@@ -99,6 +103,10 @@ public class AdminApplicationService {
         return getBusinessesUseCase.execute(search, pageable);
     }
 
+    public BusinessDto getBusinessById(Integer businessId) {
+        return getBusinessesUseCase.findById(businessId);
+    }
+
     // Employee operations
     public EmployeeDto registerEmployee(EmployeeRegistrationRequestDto request) {
         return registerEmployeeUseCase.execute(request);
@@ -106,6 +114,10 @@ public class AdminApplicationService {
 
     public Page<EmployeeDto> getEmployees(Integer roleId, String search, Pageable pageable) {
         return getEmployeesUseCase.execute(roleId, search, pageable);
+    }
+
+    public EmployeeDto getEmployeeById(Integer userId) {
+        return getEmployeesUseCase.findById(userId);
     }
 
     public void activateEmployee(Integer userId, boolean active) {
@@ -129,6 +141,10 @@ public class AdminApplicationService {
         return getContractsUseCase.execute(search, pageable);
     }
 
+    public ContractDto getContractById(Integer contractId) {
+        return getContractsUseCase.findById(contractId);
+    }
+
     public void terminateContract(Integer contractId) {
         terminateContractUseCase.execute(contractId);
     }
@@ -148,6 +164,10 @@ public class AdminApplicationService {
 
     public List<LoyaltyLevelDto> getLoyaltyLevels() {
         return getLoyaltyLevelsUseCase.execute();
+    }
+
+    public LoyaltyLevelDto getLoyaltyLevelById(Integer levelId) {
+        return getLoyaltyLevelsUseCase.findById(levelId);
     }
 
     // System configuration operations
@@ -179,6 +199,10 @@ public class AdminApplicationService {
         return getRolesUseCase.execute();
     }
 
+    public Role getRoleById(Integer roleId) {
+        return getRolesUseCase.findById(roleId);
+    }
+
     // Contract type operations
     public ContractTypeDto createContractType(CreateContractTypeRequestDto request) {
         return createContractTypeUseCase.execute(request);
@@ -190,6 +214,10 @@ public class AdminApplicationService {
 
     public List<ContractType> getContractTypes() {
         return getContractTypesUseCase.execute();
+    }
+
+    public ContractType getContractTypeById(Integer contractTypeId) {
+        return getContractTypesUseCase.findById(contractTypeId);
     }
 
     // Role operations

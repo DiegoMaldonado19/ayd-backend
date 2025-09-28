@@ -2,6 +2,7 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.admin.application.dto.BusinessDto;
 import com.ayd.sie.shared.domain.entities.Business;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.BusinessJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,13 @@ public class GetBusinessesUseCase {
         }
 
         return businesses.map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public BusinessDto findById(Integer businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new ResourceNotFoundException("Business not found with id: " + businessId));
+        return mapToDto(business);
     }
 
     private BusinessDto mapToDto(Business business) {

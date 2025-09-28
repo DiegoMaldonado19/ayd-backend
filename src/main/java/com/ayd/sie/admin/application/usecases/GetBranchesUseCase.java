@@ -2,6 +2,7 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.admin.application.dto.BranchDto;
 import com.ayd.sie.shared.domain.entities.Branch;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.BranchJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,13 @@ public class GetBranchesUseCase {
         }
 
         return branches.map(this::mapToDto);
+    }
+
+    @Transactional(readOnly = true)
+    public BranchDto findById(Integer branchId) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch not found with id: " + branchId));
+        return mapToDto(branch);
     }
 
     private BranchDto mapToDto(Branch branch) {
