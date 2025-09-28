@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -54,9 +56,21 @@ public class LoginResponseDto {
         @Schema(description = "User email address")
         private String email;
 
+        @JsonProperty("first_name")
+        @Schema(description = "User first name")
+        private String firstName;
+
+        @JsonProperty("last_name")
+        @Schema(description = "User last name")
+        private String lastName;
+
         @JsonProperty("full_name")
         @Schema(description = "User full name")
         private String fullName;
+
+        @JsonProperty("phone")
+        @Schema(description = "User phone number")
+        private String phone;
 
         @JsonProperty("role")
         @Schema(description = "User role")
@@ -65,5 +79,13 @@ public class LoginResponseDto {
         @JsonProperty("two_factor_enabled")
         @Schema(description = "Indicates if two-factor authentication is enabled")
         private Boolean twoFactorEnabled;
+
+        @JsonProperty("last_login")
+        @Schema(description = "Last login timestamp")
+        private LocalDateTime lastLogin;
+
+        @JsonProperty("created_at")
+        @Schema(description = "Account creation timestamp")
+        private LocalDateTime createdAt;
     }
 }
