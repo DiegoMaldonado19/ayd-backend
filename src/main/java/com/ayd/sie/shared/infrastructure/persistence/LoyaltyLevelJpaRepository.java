@@ -18,6 +18,8 @@ public interface LoyaltyLevelJpaRepository extends JpaRepository<LoyaltyLevel, I
 
     boolean existsByLevelNameAndActiveTrue(String levelName);
 
+    boolean existsByLevelNameAndActiveTrueAndLevelIdNot(String levelName, Integer levelId);
+
     @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.active = :active ORDER BY ll.levelName")
     List<LoyaltyLevel> findByActive(@Param("active") Boolean active);
 

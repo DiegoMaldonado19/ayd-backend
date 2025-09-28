@@ -43,6 +43,7 @@ public class AdminApplicationService {
 
     // Loyalty level management
     private final CreateLoyaltyLevelUseCase createLoyaltyLevelUseCase;
+    private final UpdateLoyaltyLevelUseCase updateLoyaltyLevelUseCase;
     private final GetLoyaltyLevelsUseCase getLoyaltyLevelsUseCase;
 
     // System configuration
@@ -160,6 +161,10 @@ public class AdminApplicationService {
     // Loyalty level operations
     public LoyaltyLevelDto createLoyaltyLevel(CreateLoyaltyLevelRequestDto request) {
         return createLoyaltyLevelUseCase.execute(request);
+    }
+
+    public LoyaltyLevelDto updateLoyaltyLevel(Integer levelId, UpdateLoyaltyLevelRequestDto request) {
+        return updateLoyaltyLevelUseCase.execute(levelId, request);
     }
 
     public List<LoyaltyLevelDto> getLoyaltyLevels() {
