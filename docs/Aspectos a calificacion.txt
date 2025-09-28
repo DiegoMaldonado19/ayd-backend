@@ -1,0 +1,56 @@
+Hoja de calificación.
+
+Módulo Administrador
+
+	* Gestión sucursales, comercios y reglas de fidelización (alta/edición/suspensión)
+	* Registro y gestión de personal (datos, contratación, roles/permisos)
+	* Validación de asignaciones (no asignar repartidores sin contrato activo)
+	* Configuración comisiones / descuentos / reglas de cancelación
+	* Bitácora de auditoría para operaciones críticas (trazabilidad)
+	* Manejo de distintos tipos de contratación de personal (temporal, fijo, por horas)
+
+
+Módulo Coordinador de Operaciones
+
+	* Visualización de historial de entregas pendientes, finalizadas y canceladas
+	* Asignación de entregas (manual + criterios automáticos: según zona o carga)
+	* Atención a incidencias y reprogramaciones
+	* Procesamiento de cancelaciones y aplicación de penalizaciones
+	* Monitorización de estados en tiempo real (creada/asignada/recogida/ruta/entregada) con todos los datos relacionados
+
+Módulo Repartidor
+
+	* Recepción y aceptación de asignaciones
+	* Registro de estados en tiempo real (recogida, en ruta, entregada, incidencia)
+	* Registro de evidencia (foto, notas) y trazabilidad de entregas
+	* Acceso a historial de entregas, cancelaciones e incidencias atendidas y comisiones obtenidas comisiones obtenidas en cada periodo
+	* Cálculo correcto de la comisión a pagar al repartidor
+
+Módulo Comercio afiliado
+
+	* Creación de guías ingresando la información del destinatario, edición antes de la recolección e impresión de guías
+	* Consulta de estado de la entrega en tiempo real y notificaciones
+	* Cancelación antes de recolección y aplicación correcta de penalizaciones por nivel
+	* Gestión de programa de fidelización y descuentos aplicados
+
+Módulo Cliente final
+
+	* Portal público de rastreo por número de guía
+	* Notificaciones automáticas al cliente (en ruta, entrega cercana, entregado)
+	* Gestión de rechazo de entrega
+	* Flujo de devolución al rechazar la recepción del paquete
+
+Seguridad y Autenticación
+
+	* Recuperación de contraseña
+	* Autenticación de doble factor
+	* Activación y desactivación de autenticación doble factor
+
+Módulo de Reportes
+
+	* Reporte entregas completadas / canceladas / rechazadas
+	* Reporte comisiones por repartidor y periodo (filtrado por fechas)
+	* Reporte descuentos aplicados por nivel de tarjeta
+	* Reporte cancelaciones por comercio y categoría
+	* Ranking de comercios por volumen mensual
+	* Exportación a PDF, Excel e imagen
