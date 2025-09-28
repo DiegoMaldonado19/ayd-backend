@@ -16,4 +16,7 @@ public interface DeliveryIncidentJpaRepository
 
     @Query("SELECT COUNT(di) FROM DeliveryIncident di WHERE di.resolvedByUser.userId = :userId")
     long countByResolvedByUserId(@Param("userId") Integer userId);
+
+    @Query("SELECT CASE WHEN COUNT(di) > 0 THEN true ELSE false END FROM DeliveryIncident di WHERE di.guide.guideId = :guideId")
+    boolean existsByGuideId(@Param("guideId") Integer guideId);
 }

@@ -591,6 +591,21 @@ public class AdminController {
         return ResponseEntity.ok(loyaltyLevel);
     }
 
+    @PutMapping("/loyalty-levels/{levelId}")
+    @Operation(summary = "Update loyalty level", description = "Update loyalty level information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Loyalty level updated successfully", content = @Content(schema = @Schema(implementation = LoyaltyLevelDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Loyalty level not found"),
+            @ApiResponse(responseCode = "409", description = "Loyalty level name already exists")
+    })
+    public ResponseEntity<LoyaltyLevelDto> updateLoyaltyLevel(
+            @PathVariable Integer levelId,
+            @Valid @RequestBody UpdateLoyaltyLevelRequestDto request) {
+        LoyaltyLevelDto updatedLevel = adminApplicationService.updateLoyaltyLevel(levelId, request);
+        return ResponseEntity.ok(updatedLevel);
+    }
+
     @PatchMapping("/loyalty-levels/{levelId}/status")
     @Operation(summary = "Change loyalty level status", description = "Activate or deactivate a loyalty level")
     @ApiResponses(value = {

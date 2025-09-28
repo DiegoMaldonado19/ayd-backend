@@ -282,4 +282,29 @@ public class CoordinatorController {
                 "active_couriers", activeCouriers,
                 "total_couriers", couriers.size()));
     }
+
+    // ===== GET ALL DATA ENDPOINTS (FOR COORDINATORS) =====
+
+    @GetMapping("/deliveries/all")
+    @Operation(summary = "Get all deliveries", description = "Retrieves paginated list of all deliveries in the system")
+    @ApiResponse(responseCode = "200", description = "All deliveries retrieved successfully")
+    public ResponseEntity<Page<AssignmentDto>> getAllDeliveries(
+            @PageableDefault(size = 20, sort = "assignmentDate") Pageable pageable) {
+
+        Page<AssignmentDto> allDeliveries = coordinatorApplicationService.getAllDeliveries(pageable);
+        return ResponseEntity.ok(allDeliveries);
+    }
+
+    @GetMapping("/commissions/all")
+    @Operation(summary = "Get all commissions", description = "Retrieves paginated list of all commissions in the system")
+    @ApiResponse(responseCode = "200", description = "All commissions retrieved successfully")
+    public ResponseEntity<Page<AllCommissionsDto>> getAllCommissions(
+            @Parameter(description = "Start date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @Parameter(description = "End date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @PageableDefault(size = 20, sort = "deliveryDate") Pageable pageable) {
+
+        Page<AllCommissionsDto> allCommissions = coordinatorApplicationService.getAllCommissions(startDate, endDate,
+                pageable);
+        return ResponseEntity.ok(allCommissions);
+    }
 }
