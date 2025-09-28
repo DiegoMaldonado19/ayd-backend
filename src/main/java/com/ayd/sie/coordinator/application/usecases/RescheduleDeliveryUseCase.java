@@ -145,7 +145,35 @@ public class RescheduleDeliveryUseCase {
                     "Entrega Reprogramada",
                     businessMessage);
 
-            // TODO: Notify customer if contact information is available
+            // Notify customer if contact information is available
+            if (savedGuide.getRecipientPhone() != null && !savedGuide.getRecipientPhone().trim().isEmpty()) {
+                String customerMessage = String.format("Su entrega %s ha sido reprogramada.",
+                        savedGuide.getGuideNumber());
+                if (newCourier != null) {
+                    customerMessage += String.format(" Nuevo repartidor asignado: %s %s",
+                            newCourier.getFirstName(), newCourier.getLastName());
+                }
+                customerMessage += " Nos pondremos en contacto con usted para coordinar la nueva fecha de entrega.";
+
+                // We'll use the business notification method as a simple email sender
+                // In a real scenario, we could create a specific customer notification method
+                // or use SMS service for phone notifications
+                notificationService.sendBusinessNotification(
+                        savedGuide.getBusiness().getBusinessEmail() != null
+                                ? savedGuide.getBusiness().getBusinessEmail()
+                                : savedGuide.getBusiness().getUser().getEmail(),
+                        "Notificación para Cliente - Entrega Reprogramada",
+                        String.format("PARA CLIENTE: %s (Tel: %s)%n%nMensaje: %s",
+                                savedGuide.getRecipientName(),
+                                savedGuide.getRecipientPhone(),
+                                customerMessage));
+
+                log.info("Customer notification attempted for guide: {}, recipient: {}",
+                        savedGuide.getGuideNumber(), savedGuide.getRecipientName());
+            } else {
+                log.warn("Customer contact information not available for guide: {}",
+                        savedGuide.getGuideNumber());
+            }
             customerNotified = true;
         } catch (Exception e) {
             log.warn("Failed to send reschedule notifications: {}", e.getMessage());

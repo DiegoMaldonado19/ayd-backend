@@ -30,6 +30,7 @@ public class GetDeliveryDashboardUseCase {
     private final UserJpaRepository userRepository;
     private final ContractJpaRepository contractRepository;
     private final DeliveryIncidentJpaRepository deliveryIncidentRepository;
+    private final IncidentTypeJpaRepository incidentTypeRepository;
 
     @Transactional(readOnly = true)
     public DeliveryDashboardDto execute(LocalDate date) {
@@ -166,15 +167,22 @@ public class GetDeliveryDashboardUseCase {
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         List<DeliveryIncident> incidents = deliveryIncidentRepository.findAll(pageRequest).getContent();
 
-        return incidents.stream().map(incident -> DeliveryDashboardDto.IncidentSummaryDto.builder()
-                .incidentId(incident.getIncidentId())
-                .guideNumber(incident.getGuide().getGuideNumber())
-                .incidentType("Incident Type " + incident.getIncidentTypeId()) // TODO: Get actual incident type name
-                .reportedBy(incident.getReportedByUser().getFirstName() + " " +
-                        incident.getReportedByUser().getLastName())
-                .createdAt(incident.getCreatedAt())
-                .resolved(incident.getResolved())
-                .build()).collect(Collectors.toList());
+        return incidents.stream().map(incident -> {
+            // Get the actual incident type name from the repository
+            String incidentTypeName = incidentTypeRepository.findById(incident.getIncidentTypeId())
+                    .map(incidentType -> incidentType.getTypeName())
+                    .orElse("Tipo de Incidente Desconocido");
+
+            return DeliveryDashboardDto.IncidentSummaryDto.builder()
+                    .incidentId(incident.getIncidentId())
+                    .guideNumber(incident.getGuide().getGuideNumber())
+                    .incidentType(incidentTypeName) // Get actual incident type name
+                    .reportedBy(incident.getReportedByUser().getFirstName() + " " +
+                            incident.getReportedByUser().getLastName())
+                    .createdAt(incident.getCreatedAt())
+                    .resolved(incident.getResolved())
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private List<DeliveryDashboardDto.CourierWorkloadDto> getCourierWorkload() {
