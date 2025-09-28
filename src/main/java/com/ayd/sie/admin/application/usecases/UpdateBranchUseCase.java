@@ -33,6 +33,11 @@ public class UpdateBranchUseCase {
         branch.setCity(request.getCity());
         branch.setState(request.getState());
 
+        // Update active status if provided
+        if (request.getActive() != null) {
+            branch.setActive(request.getActive());
+        }
+
         Branch savedBranch = branchRepository.save(branch);
 
         log.info("Branch updated successfully with ID: {}", branchId);

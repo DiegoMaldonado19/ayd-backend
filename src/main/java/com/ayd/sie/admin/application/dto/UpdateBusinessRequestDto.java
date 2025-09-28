@@ -48,4 +48,8 @@ public class UpdateBusinessRequestDto {
     @JsonProperty("support_contact")
     @Schema(description = "Support contact", example = "soporte@electronicamoderna.gt")
     private String supportContact;
+
+    @JsonProperty("active")
+    @Schema(description = "Business active status", example = "true")
+    private Boolean active;
 }

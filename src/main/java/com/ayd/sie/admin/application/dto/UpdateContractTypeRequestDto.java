@@ -23,4 +23,7 @@ public class UpdateContractTypeRequestDto {
     @Size(max = 500, message = "Description must not exceed 500 characters")
     @Schema(description = "Updated contract type description", example = "Contrato permanente con beneficios")
     private String description;
+
+    @Schema(description = "Contract type active status", example = "true")
+    private Boolean active;
 }

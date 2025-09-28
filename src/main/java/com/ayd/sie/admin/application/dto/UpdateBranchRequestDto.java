@@ -48,4 +48,8 @@ public class UpdateBranchRequestDto {
     @Size(max = 100, message = "State must not exceed 100 characters")
     @Schema(description = "State", example = "Guatemala")
     private String state;
+
+    @JsonProperty("active")
+    @Schema(description = "Branch active status", example = "true")
+    private Boolean active;
 }

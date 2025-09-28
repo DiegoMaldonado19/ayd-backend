@@ -34,6 +34,11 @@ public class UpdateRoleUseCase {
         role.setRoleName(request.getRole_name());
         role.setDescription(request.getDescription());
 
+        // Update active status if provided
+        if (request.getActive() != null) {
+            role.setActive(request.getActive());
+        }
+
         Role savedRole = roleRepository.save(role);
         log.info("Updated role: {}", savedRole.getRoleName());
 

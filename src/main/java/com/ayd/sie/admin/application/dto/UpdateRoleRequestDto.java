@@ -23,4 +23,7 @@ public class UpdateRoleRequestDto {
     @Size(max = 500, message = "Description must not exceed 500 characters")
     @Schema(description = "Updated role description", example = "Manages complex operations")
     private String description;
+
+    @Schema(description = "Role active status", example = "true")
+    private Boolean active;
 }
