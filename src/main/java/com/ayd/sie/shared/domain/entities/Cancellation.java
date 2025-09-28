@@ -47,10 +47,4 @@ public class Cancellation {
 
     @Column(name = "cancelled_at", nullable = false)
     private LocalDateTime cancelledAt;
-
-    @Column(name = "processed_at")
-    private LocalDateTime processedAt;
-
-    @Column(name = "coordinator_notes", columnDefinition = "TEXT")
-    private String coordinatorNotes;
 }

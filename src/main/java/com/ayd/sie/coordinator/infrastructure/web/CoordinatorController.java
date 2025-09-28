@@ -12,7 +12,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -185,17 +187,35 @@ public class CoordinatorController {
     }
 
     @GetMapping("/deliveries/history")
-    @Operation(summary = "Get delivery history", description = "Retrieves paginated delivery history with filtering options")
-    @ApiResponse(responseCode = "200", description = "Delivery history retrieved successfully")
+    @Operation(summary = "Get delivery history", description = "Get paginated delivery history with filters")
+    @ApiResponse(responseCode = "200", description = "History retrieved successfully")
     public ResponseEntity<Page<AssignmentDto>> getDeliveryHistory(
-            @Parameter(description = "Filter by delivery status") @RequestParam(required = false) String status,
+            @Parameter(description = "Filter by status") @RequestParam(required = false) String status,
             @Parameter(description = "Search term") @RequestParam(required = false) String search,
-            @Parameter(description = "Start date filter") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @Parameter(description = "End date filter") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @PageableDefault(size = 20, sort = "assignedAt") Pageable pageable) {
+            @Parameter(description = "Start date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @Parameter(description = "End date (yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort field") @RequestParam(defaultValue = "assignmentDate") String sortBy,
+            @Parameter(description = "Sort direction") @RequestParam(defaultValue = "DESC") String sortDirection) {
+
+        // Map frontend field names to entity field names
+        String actualSortField = switch (sortBy) {
+            case "assignedAt" -> "assignmentDate"; // Map frontend name to actual field
+            case "guideNumber" -> "guideNumber";
+            case "businessName" -> "business.businessName";
+            case "recipientName" -> "recipientName";
+            case "state" -> "currentState.stateName";
+            default -> "assignmentDate";
+        };
+
+        Sort.Direction direction = "ASC".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, actualSortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<AssignmentDto> history = coordinatorApplicationService.getDeliveryHistory(
                 status, search, startDate, endDate, pageable);
+
         return ResponseEntity.ok(history);
     }
 

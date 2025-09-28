@@ -50,4 +50,10 @@ public interface TrackingStateJpaRepository extends JpaRepository<TrackingState,
 
     @Query("SELECT ts FROM TrackingState ts WHERE ts.stateName LIKE %:namePattern% AND ts.active = true ORDER BY ts.stateOrder")
     List<TrackingState> findByStateNameContainingAndActiveTrue(@Param("namePattern") String namePattern);
+
+    List<TrackingState> findByIsFinalTrue();
+
+    List<TrackingState> findByIsFinalFalse();
+
+    boolean existsByStateName(String stateName);
 }
