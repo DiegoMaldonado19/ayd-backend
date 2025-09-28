@@ -1,6 +1,7 @@
 package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.shared.domain.entities.Role;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.RoleJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,5 +20,11 @@ public class GetRolesUseCase {
     @Transactional(readOnly = true)
     public List<Role> execute() {
         return roleRepository.findByActiveTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public Role findById(Integer roleId) {
+        return roleRepository.findById(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
     }
 }

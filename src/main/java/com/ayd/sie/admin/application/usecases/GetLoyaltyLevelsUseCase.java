@@ -2,6 +2,7 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.admin.application.dto.LoyaltyLevelDto;
 import com.ayd.sie.shared.domain.entities.LoyaltyLevel;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.LoyaltyLevelJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,13 @@ public class GetLoyaltyLevelsUseCase {
         return levels.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public LoyaltyLevelDto findById(Integer levelId) {
+        LoyaltyLevel level = loyaltyLevelRepository.findById(levelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loyalty level not found with id: " + levelId));
+        return mapToDto(level);
     }
 
     private LoyaltyLevelDto mapToDto(LoyaltyLevel level) {

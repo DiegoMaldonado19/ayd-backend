@@ -2,6 +2,7 @@ package com.ayd.sie.admin.application.usecases;
 
 import com.ayd.sie.admin.application.dto.EmployeeDto;
 import com.ayd.sie.shared.domain.entities.User;
+import com.ayd.sie.shared.domain.exceptions.ResourceNotFoundException;
 import com.ayd.sie.shared.infrastructure.persistence.ContractJpaRepository;
 import com.ayd.sie.shared.infrastructure.persistence.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,14 @@ public class GetEmployeesUseCase {
         int end = Math.min((start + pageable.getPageSize()), employeeDtos.size());
         List<EmployeeDto> pageContent = employeeDtos.subList(start, end);
 
-        return new PageImpl<>(pageContent, pageable, employeeDtos.size());
+        return new PageImpl<>(pageContent, pageable, allEmployees.size());
+    }
+
+    @Transactional(readOnly = true)
+    public EmployeeDto findById(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + userId));
+        return mapToDto(user);
     }
 
     private EmployeeDto mapToDto(User user) {
