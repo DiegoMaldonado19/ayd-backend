@@ -24,7 +24,6 @@ public class ProcessCancellationUseCase {
         private final CancellationJpaRepository cancellationRepository;
         private final CancellationTypeJpaRepository cancellationTypeRepository;
         private final UserJpaRepository userRepository;
-        private final LoyaltyLevelJpaRepository loyaltyLevelRepository;
         private final NotificationService notificationService;
 
         @Transactional

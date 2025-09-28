@@ -18,12 +18,18 @@ public interface LoyaltyLevelJpaRepository extends JpaRepository<LoyaltyLevel, I
 
     boolean existsByLevelName(String levelName);
 
+    // Add this method for CreateLoyaltyLevelUseCase
+    boolean existsByLevelNameAndActiveTrue(String levelName);
+
+    // Add this method for GetLoyaltyLevelsUseCase
+    List<LoyaltyLevel> findByActiveTrueOrderByMinDeliveries();
+
     @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.active = :active ORDER BY ll.levelName")
     List<LoyaltyLevel> findByActive(@Param("active") Boolean active);
 
     @Query("SELECT COUNT(ll) FROM LoyaltyLevel ll WHERE ll.active = true")
     long countActiveLevels();
 
-    @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.minimumDeliveries <= :deliveryCount AND ll.active = true ORDER BY ll.minimumDeliveries DESC")
+    @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.minDeliveries <= :deliveryCount AND ll.active = true ORDER BY ll.minDeliveries DESC")
     List<LoyaltyLevel> findEligibleLevels(@Param("deliveryCount") Integer deliveryCount);
 }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -63,7 +64,7 @@ public class AssignDeliveryUseCase {
 
                 // 5. Validate courier has active contract
                 boolean hasActiveContract = contractRepository.hasActiveContractOnDate(
-                                courier.getUserId(), java.time.LocalDate.now());
+                                courier.getUserId(), LocalDate.now());
 
                 if (!hasActiveContract) {
                         throw new BusinessConstraintViolationException("Courier does not have an active contract");
