@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/coordinator")
+@RequestMapping("/coordinator")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Coordinator", description = "Coordinator operations for delivery management")
