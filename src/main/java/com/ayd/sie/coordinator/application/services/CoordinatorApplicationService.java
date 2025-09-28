@@ -37,6 +37,10 @@ public class CoordinatorApplicationService {
     // Reschedule use cases
     private final RescheduleDeliveryUseCase rescheduleDeliveryUseCase;
 
+    // Get all data use cases (for coordinators)
+    private final GetAllDeliveriesUseCase getAllDeliveriesUseCase;
+    private final GetAllCommissionsUseCase getAllCommissionsUseCase;
+
     // === DELIVERY ASSIGNMENT OPERATIONS ===
 
     public AssignmentDto assignDelivery(AssignDeliveryRequestDto request, Integer coordinatorId) {
@@ -98,5 +102,15 @@ public class CoordinatorApplicationService {
 
     public RescheduleDto rescheduleDelivery(Integer guideId, RescheduleDto request, Integer coordinatorId) {
         return rescheduleDeliveryUseCase.execute(guideId, request, coordinatorId);
+    }
+
+    // === GET ALL DATA OPERATIONS (FOR COORDINATORS) ===
+
+    public Page<AssignmentDto> getAllDeliveries(Pageable pageable) {
+        return getAllDeliveriesUseCase.execute(pageable);
+    }
+
+    public Page<AllCommissionsDto> getAllCommissions(LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        return getAllCommissionsUseCase.execute(startDate, endDate, pageable);
     }
 }
