@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -36,7 +35,6 @@ public class CoordinatorController {
     // ===== DELIVERY ASSIGNMENT ENDPOINTS =====
 
     @PostMapping("/assignments")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Assign delivery to courier", description = "Assigns a delivery guide to an available courier")
     @ApiResponse(responseCode = "200", description = "Delivery assigned successfully")
     @ApiResponse(responseCode = "400", description = "Invalid assignment request")
@@ -53,7 +51,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/deliveries/pending")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get pending deliveries", description = "Retrieves paginated list of pending deliveries that need assignment")
     @ApiResponse(responseCode = "200", description = "Pending deliveries retrieved successfully")
     public ResponseEntity<Page<AssignmentDto>> getPendingDeliveries(
@@ -65,7 +62,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/couriers/available")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get available couriers", description = "Retrieves all active couriers with their workload and contract status")
     @ApiResponse(responseCode = "200", description = "Available couriers retrieved successfully")
     public ResponseEntity<List<DeliveryDashboardDto.CourierWorkloadDto>> getAvailableCouriers() {
@@ -75,7 +71,6 @@ public class CoordinatorController {
     }
 
     @PutMapping("/assignments/{guideId}/reassign")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Reassign delivery", description = "Reassigns a delivery to a different courier")
     @ApiResponse(responseCode = "200", description = "Delivery reassigned successfully")
     @ApiResponse(responseCode = "400", description = "Invalid reassignment request")
@@ -98,7 +93,6 @@ public class CoordinatorController {
     // ===== INCIDENT MANAGEMENT ENDPOINTS =====
 
     @PostMapping("/incidents")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Report delivery incident", description = "Reports an incident for a delivery in progress")
     @ApiResponse(responseCode = "200", description = "Incident reported successfully")
     @ApiResponse(responseCode = "400", description = "Invalid incident data")
@@ -114,7 +108,6 @@ public class CoordinatorController {
     }
 
     @PutMapping("/incidents/{incidentId}/resolve")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Resolve incident", description = "Marks an incident as resolved with resolution details")
     @ApiResponse(responseCode = "200", description = "Incident resolved successfully")
     @ApiResponse(responseCode = "400", description = "Invalid resolution data")
@@ -132,7 +125,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/incidents")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get delivery incidents", description = "Retrieves paginated list of delivery incidents with optional filtering")
     @ApiResponse(responseCode = "200", description = "Incidents retrieved successfully")
     public ResponseEntity<Page<IncidentDto>> getIncidents(
@@ -147,7 +139,6 @@ public class CoordinatorController {
     // ===== CANCELLATION ENDPOINTS =====
 
     @PostMapping("/cancellations")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Process delivery cancellation", description = "Processes a delivery cancellation with penalty calculation")
     @ApiResponse(responseCode = "200", description = "Cancellation processed successfully")
     @ApiResponse(responseCode = "400", description = "Invalid cancellation request")
@@ -164,7 +155,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/cancellations/{guideId}/validate")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Validate cancellation", description = "Validates if a delivery can be cancelled")
     @ApiResponse(responseCode = "200", description = "Validation result returned")
     public ResponseEntity<Map<String, Object>> validateCancellation(
@@ -181,7 +171,6 @@ public class CoordinatorController {
     // ===== DASHBOARD AND MONITORING ENDPOINTS =====
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get delivery dashboard", description = "Retrieves comprehensive delivery dashboard data for a specific date")
     @ApiResponse(responseCode = "200", description = "Dashboard data retrieved successfully")
     public ResponseEntity<DeliveryDashboardDto> getDeliveryDashboard(
@@ -196,7 +185,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/deliveries/history")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get delivery history", description = "Retrieves paginated delivery history with filtering options")
     @ApiResponse(responseCode = "200", description = "Delivery history retrieved successfully")
     public ResponseEntity<Page<AssignmentDto>> getDeliveryHistory(
@@ -212,7 +200,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/couriers/workload")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get courier workload", description = "Retrieves detailed workload information for all couriers")
     @ApiResponse(responseCode = "200", description = "Courier workload retrieved successfully")
     public ResponseEntity<List<DeliveryDashboardDto.CourierWorkloadDto>> getCourierWorkload() {
@@ -224,7 +211,6 @@ public class CoordinatorController {
     // ===== RESCHEDULE ENDPOINTS =====
 
     @PutMapping("/deliveries/{guideId}/reschedule")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Reschedule delivery", description = "Reschedules a delivery with optional courier change")
     @ApiResponse(responseCode = "200", description = "Delivery rescheduled successfully")
     @ApiResponse(responseCode = "400", description = "Invalid reschedule request")
@@ -244,7 +230,6 @@ public class CoordinatorController {
     // ===== UTILITY ENDPOINTS =====
 
     @GetMapping("/health")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Health check", description = "Checks coordinator module health")
     @ApiResponse(responseCode = "200", description = "Module is healthy")
     public ResponseEntity<Map<String, Object>> healthCheck() {
@@ -255,7 +240,6 @@ public class CoordinatorController {
     }
 
     @GetMapping("/stats")
-    @PreAuthorize("hasRole('Coordinador')")
     @Operation(summary = "Get coordinator statistics", description = "Retrieves basic statistics for coordinator operations")
     @ApiResponse(responseCode = "200", description = "Statistics retrieved successfully")
     public ResponseEntity<Map<String, Object>> getStatistics() {
