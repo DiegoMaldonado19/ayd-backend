@@ -24,12 +24,17 @@ public class CancelDeliveryUseCase {
     private final CancellationTypeJpaRepository cancellationTypeRepository;
     private final CancellationJpaRepository cancellationRepository;
     private final UserJpaRepository userRepository;
+    private final StateHistoryJpaRepository stateHistoryRepository;
     private final NotificationService notificationService;
 
     @Transactional
-    public CancellationResponseDto execute(Integer guideId, CancelGuideDto dto, Integer businessId) {
-        // Validate business exists and is active
-        Business business = businessRepository.findByUserUserIdAndActiveTrue(businessId)
+    public CancellationResponseDto execute(Integer guideId, CancelGuideDto dto, Integer userId) {
+        // Find business user first
+        User businessUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Business user not found"));
+
+        // Validate business exists and is active using the userId
+        Business business = businessRepository.findByUserUserIdAndActiveTrue(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Business not found"));
 
         // Find guide
@@ -58,8 +63,7 @@ public class CancelDeliveryUseCase {
         // Get cancellation type (business cancellation)
         CancellationType cancellationType = cancellationTypeRepository
                 .findByTypeNameAndActiveTrue("Cancelación por Comercio")
-                .orElse(cancellationTypeRepository.findByActiveTrueOrderByTypeName().get(0)); // Use first available
-                                                                                              // type as fallback
+                .orElse(cancellationTypeRepository.findByActiveTrueOrderByTypeName().get(0));
 
         // Calculate penalty based on loyalty level
         BigDecimal penaltyAmount = calculatePenaltyAmount(guide, business);
@@ -69,13 +73,20 @@ public class CancelDeliveryUseCase {
         guide.setCancellationDate(LocalDateTime.now());
         TrackingGuide updatedGuide = trackingGuideRepository.save(guide);
 
-        // Create cancellation record
-        User businessUser = userRepository.findById(businessId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business user not found"));
+        // Log state history for the cancellation
+        StateHistory stateHistory = StateHistory.builder()
+                .guide(updatedGuide)
+                .state(cancelledState)
+                .user(businessUser)
+                .observations("Guide cancelled by business: " + dto.getCancellation_reason())
+                .changedAt(LocalDateTime.now())
+                .build();
+        stateHistoryRepository.save(stateHistory);
 
+        // Create cancellation record with the correct user
         Cancellation cancellation = Cancellation.builder()
                 .guide(updatedGuide)
-                .cancelledByUser(businessUser)
+                .cancelledByUser(businessUser) // Use the user we found earlier
                 .cancellationType(cancellationType)
                 .reason(dto.getCancellation_reason())
                 .penaltyAmount(penaltyAmount)
@@ -92,7 +103,7 @@ public class CancelDeliveryUseCase {
             notificationService.sendCancellationNotification(
                     business.getEmail(),
                     "Guide Cancelled - " + guide.getGuideNumber(),
-                    "Your guide has been cancelled. Penalty amount: $" + penaltyAmount,
+                    String.format("Your guide has been cancelled. Penalty amount: $%.2f", penaltyAmount),
                     guide.getGuideNumber());
 
             // Notify courier if assigned
@@ -117,7 +128,7 @@ public class CancelDeliveryUseCase {
         }
 
         // Check if business has free cancellations remaining
-        // For simplicity, we'll apply the penalty percentage directly
+        // Apply the penalty percentage based on loyalty level
         BigDecimal penaltyPercentage = loyaltyLevel.getPenaltyPercentage();
         return guide.getBasePrice().multiply(penaltyPercentage).divide(BigDecimal.valueOf(100));
     }

@@ -24,56 +24,56 @@ public class BusinessApplicationService {
     /**
      * Creates a new tracking guide with automatic loyalty discount application
      */
-    public GuideResponseDto createGuide(CreateGuideDto createGuideDto, Integer businessId) {
-        return createTrackingGuideUseCase.execute(createGuideDto, businessId);
+    public GuideResponseDto createGuide(CreateGuideDto createGuideDto, Integer userId) {
+        return createTrackingGuideUseCase.execute(createGuideDto, userId);
     }
 
     /**
      * Updates a tracking guide (only before pickup)
      */
-    public GuideResponseDto updateGuide(Integer guideId, UpdateGuideDto updateGuideDto, Integer businessId) {
-        return updateTrackingGuideUseCase.execute(guideId, updateGuideDto, businessId);
+    public GuideResponseDto updateGuide(Integer guideId, UpdateGuideDto updateGuideDto, Integer userId) {
+        return updateTrackingGuideUseCase.execute(guideId, updateGuideDto, userId);
     }
 
     /**
      * Gets guide status by ID
      */
-    public GuideStatusDto getGuideStatus(Integer guideId, Integer businessId) {
-        return getGuideStatusUseCase.execute(guideId, businessId);
+    public GuideStatusDto getGuideStatus(Integer guideId, Integer userId) {
+        return getGuideStatusUseCase.execute(guideId, userId);
     }
 
     /**
      * Gets guide status by guide number
      */
-    public GuideStatusDto getGuideStatusByNumber(String guideNumber, Integer businessId) {
-        return getGuideStatusUseCase.executeByGuideNumber(guideNumber, businessId);
+    public GuideStatusDto getGuideStatusByNumber(String guideNumber, Integer userId) {
+        return getGuideStatusUseCase.executeByGuideNumber(guideNumber, userId);
     }
 
     /**
      * Lists business guides with pagination
      */
-    public GuideListResponseDto getBusinessGuides(Integer businessId, Pageable pageable) {
-        return getBusinessGuidesUseCase.execute(businessId, pageable);
+    public GuideListResponseDto getBusinessGuides(Integer userId, Pageable pageable) {
+        return getBusinessGuidesUseCase.execute(userId, pageable);
     }
 
     /**
      * Lists active business guides with pagination
      */
-    public GuideListResponseDto getActiveBusinessGuides(Integer businessId, Pageable pageable) {
-        return getBusinessGuidesUseCase.executeActiveOnly(businessId, pageable);
+    public GuideListResponseDto getActiveBusinessGuides(Integer userId, Pageable pageable) {
+        return getBusinessGuidesUseCase.executeActiveOnly(userId, pageable);
     }
 
     /**
      * Cancels a delivery with penalty calculation based on loyalty level
      */
-    public CancellationResponseDto cancelDelivery(Integer guideId, CancelGuideDto cancelGuideDto, Integer businessId) {
-        return cancelDeliveryUseCase.execute(guideId, cancelGuideDto, businessId);
+    public CancellationResponseDto cancelDelivery(Integer guideId, CancelGuideDto cancelGuideDto, Integer userId) {
+        return cancelDeliveryUseCase.execute(guideId, cancelGuideDto, userId);
     }
 
     /**
      * Gets current loyalty benefits and status
      */
-    public LoyaltyBenefitsDto getLoyaltyBenefits(Integer businessId) {
-        return getLoyaltyBenefitsUseCase.execute(businessId);
+    public LoyaltyBenefitsDto getLoyaltyBenefits(Integer userId) {
+        return getLoyaltyBenefitsUseCase.execute(userId);
     }
 }
