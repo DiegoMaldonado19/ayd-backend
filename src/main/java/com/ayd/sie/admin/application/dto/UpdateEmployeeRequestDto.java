@@ -16,9 +16,7 @@ import lombok.NoArgsConstructor;
 public class UpdateEmployeeRequestDto {
 
     @JsonProperty("role_id")
-    @Min(value = 1, message = "Invalid role")
-    @Max(value = 5, message = "Invalid role")
-    @Schema(description = "Employee role ID (2=Coordinator, 3=Courier)", example = "3")
+    @Schema(description = "Employee role ID", example = "3")
     private Integer roleId;
 
     @JsonProperty("email")
