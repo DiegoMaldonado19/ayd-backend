@@ -22,13 +22,27 @@ services:
     depends_on:
       - mariadb
     environment:
-      DB_URL: ${SPRING_DATASOURCE_URL}
+      DB_URL: jdbc:mariadb://mariadb:3306/sie_db
       DB_USER: ${SPRING_DATASOURCE_USERNAME}
       DB_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.mariadb.jdbc.Driver
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: 3600000
+      JWT_REFRESH_EXPIRATION: 86400000
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: dmaldonado1920@gmail.com
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      FILE_UPLOAD_PATH: /app/uploads
+      LOG_LEVEL_APP: INFO
+      LOG_LEVEL_SECURITY: WARN
+      LOG_LEVEL_WEB: WARN
+      LOG_LEVEL_SQL: WARN
+      LOG_LEVEL_HIBERNATE: WARN
+      LOG_FILE_NAME: /app/logs/sie-application.log
     ports:
       - "8080:8080"
 
