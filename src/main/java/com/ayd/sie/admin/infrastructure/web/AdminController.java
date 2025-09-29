@@ -366,6 +366,20 @@ public class AdminController {
         return ResponseEntity.ok(contract);
     }
 
+    @PutMapping("/contracts/{contractId}")
+    @Operation(summary = "Update contract", description = "Update contract information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contract updated successfully", content = @Content(schema = @Schema(implementation = ContractDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Contract or contract type not found")
+    })
+    public ResponseEntity<ContractDto> updateContract(
+            @PathVariable Integer contractId,
+            @Valid @RequestBody UpdateContractRequestDto request) {
+        ContractDto contract = adminApplicationService.updateContract(contractId, request);
+        return ResponseEntity.ok(contract);
+    }
+
     @PatchMapping("/contracts/{contractId}/terminate")
     @Operation(summary = "Terminate contract", description = "Terminate an active contract")
     public ResponseEntity<Map<String, Object>> terminateContract(@PathVariable Integer contractId) {
