@@ -100,6 +100,24 @@ public class CoordinatorController {
         return ResponseEntity.ok(couriers);
     }
 
+    @GetMapping("/incident-types")
+    @Operation(summary = "Get incident types", description = "Retrieves all active incident types available for incident reporting")
+    @ApiResponse(responseCode = "200", description = "Incident types retrieved successfully")
+    public ResponseEntity<List<IncidentTypeDto>> getIncidentTypes() {
+
+        List<IncidentTypeDto> incidentTypes = coordinatorApplicationService.getIncidentTypes();
+        return ResponseEntity.ok(incidentTypes);
+    }
+
+    @GetMapping("/cancellation-types")
+    @Operation(summary = "Get cancellation types", description = "Retrieves all active cancellation types available for delivery cancellation")
+    @ApiResponse(responseCode = "200", description = "Cancellation types retrieved successfully")
+    public ResponseEntity<List<CancellationTypeDto>> getCancellationTypes() {
+
+        List<CancellationTypeDto> cancellationTypes = coordinatorApplicationService.getCancellationTypes();
+        return ResponseEntity.ok(cancellationTypes);
+    }
+
     @PutMapping("/assignments/{guideId}/reassign")
     @Operation(summary = "Reassign delivery", description = "Reassigns a delivery to a different courier")
     @ApiResponse(responseCode = "200", description = "Delivery reassigned successfully")
