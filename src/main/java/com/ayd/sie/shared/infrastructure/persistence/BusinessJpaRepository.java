@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,4 +49,40 @@ public interface BusinessJpaRepository extends JpaRepository<Business, Integer> 
     // Count businesses by loyalty level
     @Query("SELECT COUNT(b) FROM Business b WHERE b.currentLevel.levelId = :levelId")
     long countByCurrentLevelLevelId(@Param("levelId") Integer levelId);
+
+    // Additional methods for reporting
+    @Query("SELECT b.businessId, b.businessName, b.businessEmail, " +
+            "COALESCE(ll.levelName, 'None') as loyaltyLevel, " +
+            "COUNT(tg.guideId) as totalDeliveries, " +
+            "SUM(CASE WHEN tg.currentState.stateName = 'Entregada' THEN 1 ELSE 0 END) as completedDeliveries, " +
+            "SUM(CASE WHEN tg.currentState.stateName IN ('Cancelada', 'Rechazada') THEN 1 ELSE 0 END) as cancelledDeliveries, "
+            +
+            "COALESCE(SUM(tg.basePrice), 0) as totalRevenue " +
+            "FROM Business b " +
+            "LEFT JOIN b.currentLevel ll " +
+            "LEFT JOIN TrackingGuide tg ON b.businessId = tg.business.businessId " +
+            "AND tg.createdAt BETWEEN :startDate AND :endDate " +
+            "WHERE b.active = true " +
+            "GROUP BY b.businessId, b.businessName, b.businessEmail, ll.levelName " +
+            "ORDER BY totalDeliveries DESC")
+    List<Object[]> findBusinessStatisticsForPeriod(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT b.businessId, b.businessName, b.businessEmail, " +
+            "COALESCE(ll.levelName, 'None') as loyaltyLevel, " +
+            "COUNT(tg.guideId) as totalDeliveries, " +
+            "SUM(CASE WHEN tg.currentState.stateName = 'Entregada' THEN 1 ELSE 0 END) as completedDeliveries, " +
+            "SUM(CASE WHEN tg.currentState.stateName IN ('Cancelada', 'Rechazada') THEN 1 ELSE 0 END) as cancelledDeliveries "
+            +
+            "FROM Business b " +
+            "LEFT JOIN b.currentLevel ll " +
+            "LEFT JOIN TrackingGuide tg ON b.businessId = tg.business.businessId " +
+            "AND tg.currentState.stateName IN ('Cancelada', 'Rechazada') " +
+            "AND tg.cancellationDate BETWEEN :startDate AND :endDate " +
+            "WHERE b.active = true " +
+            "GROUP BY b.businessId, b.businessName, b.businessEmail, ll.levelName " +
+            "HAVING SUM(CASE WHEN tg.currentState.stateName IN ('Cancelada', 'Rechazada') THEN 1 ELSE 0 END) > 0 " +
+            "ORDER BY cancelledDeliveries DESC")
+    List<Object[]> findCancellationStatisticsByBusiness(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }
