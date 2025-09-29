@@ -21,7 +21,7 @@ public class GetLoyaltyLevelsUseCase {
 
     @Transactional(readOnly = true)
     public List<LoyaltyLevelDto> execute() {
-        List<LoyaltyLevel> levels = loyaltyLevelRepository.findByActiveTrueOrderByMinDeliveries();
+        List<LoyaltyLevel> levels = loyaltyLevelRepository.findAllByOrderByMinDeliveries();
         return levels.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());

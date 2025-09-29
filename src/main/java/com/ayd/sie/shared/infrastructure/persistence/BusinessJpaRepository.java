@@ -17,9 +17,9 @@ public interface BusinessJpaRepository extends JpaRepository<Business, Integer> 
 
     Optional<Business> findByUserUserIdAndActiveTrue(Integer userId);
 
-    List<Business> findByActiveTrue();
+    // List<Business> findByActiveTrue();
 
-    Page<Business> findByActiveTrue(Pageable pageable);
+    // Page<Business> findByActiveTrue(Pageable pageable);
 
     boolean existsByTaxIdAndBusinessIdNotAndActiveTrue(String taxId, Integer businessId);
 
@@ -33,11 +33,17 @@ public interface BusinessJpaRepository extends JpaRepository<Business, Integer> 
     @Query("SELECT b FROM Business b WHERE b.active = true ORDER BY b.businessName")
     Page<Business> findAllActive(Pageable pageable);
 
-    @Query("SELECT b FROM Business b WHERE b.active = true AND " +
+    // @Query("SELECT b FROM Business b WHERE b.active = true AND " +
+    //         "(LOWER(b.businessName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+    //         "LOWER(b.legalName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+    //         "LOWER(b.taxId) LIKE LOWER(CONCAT('%', :search, '%')))")
+    // Page<Business> findActiveBySearch(@Param("search") String search, Pageable pageable);
+
+    @Query("SELECT b FROM Business b WHERE " +
             "(LOWER(b.businessName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(b.legalName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(b.taxId) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Business> findActiveBySearch(@Param("search") String search, Pageable pageable);
+    Page<Business> findBySearch(@Param("search") String search, Pageable pageable);
 
     @Query("SELECT b FROM Business b WHERE b.currentLevel.levelId = :levelId")
     List<Business> findByCurrentLevelId(@Param("levelId") Integer levelId);

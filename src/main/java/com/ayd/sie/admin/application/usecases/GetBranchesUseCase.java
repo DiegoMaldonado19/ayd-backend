@@ -23,9 +23,9 @@ public class GetBranchesUseCase {
         Page<Branch> branches;
 
         if (search != null && !search.trim().isEmpty()) {
-            branches = branchRepository.findActiveBySearch(search.trim(), pageable);
+            branches = branchRepository.findBySearch(search.trim(), pageable);
         } else {
-            branches = branchRepository.findByActiveTrue(pageable);
+            branches = branchRepository.findAll(pageable);
         }
 
         return branches.map(this::mapToDto);

@@ -24,7 +24,7 @@ public interface UserJpaRepository extends JpaRepository<User, Integer>, JpaSpec
 
     boolean existsByNationalId(String nationalId);
 
-    List<User> findByRoleRoleIdAndActiveTrue(Integer roleId);
+    List<User> findByRoleRoleId(Integer roleId);
 
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.active = true AND " +
             "(u.lockedUntil IS NULL OR u.lockedUntil < :now)")

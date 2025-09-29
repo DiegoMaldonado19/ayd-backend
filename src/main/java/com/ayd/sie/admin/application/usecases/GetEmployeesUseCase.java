@@ -29,11 +29,11 @@ public class GetEmployeesUseCase {
         List<User> allEmployees;
 
         if (roleId != null) {
-            allEmployees = userRepository.findByRoleRoleIdAndActiveTrue(roleId);
+            allEmployees = userRepository.findByRoleRoleId(roleId);
         } else {
             // Get coordinators and couriers (roles 2 and 3)
-            List<User> coordinators = userRepository.findByRoleRoleIdAndActiveTrue(2);
-            List<User> couriers = userRepository.findByRoleRoleIdAndActiveTrue(3);
+            List<User> coordinators = userRepository.findByRoleRoleId(2);
+            List<User> couriers = userRepository.findByRoleRoleId(3);
             allEmployees = coordinators;
             allEmployees.addAll(couriers);
         }
