@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -261,4 +262,32 @@ public interface TrackingGuideJpaRepository
                         "LEFT JOIN FETCH tg.currentState " +
                         "WHERE tg.business.businessId = :businessId AND tg.currentState.isFinal = false")
         List<TrackingGuide> findActiveByBusinessIdWithFetch(@Param("businessId") Integer businessId);
+
+        // Additional methods for reporting
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.currentState.stateName = :stateName AND tg.deliveryDate BETWEEN :startDate AND :endDate")
+        long countByCurrentStateStateNameAndDeliveryDateBetween(@Param("stateName") String stateName,
+                        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.currentState.stateName = :stateName AND tg.cancellationDate BETWEEN :startDate AND :endDate")
+        long countByCurrentStateStateNameAndCancellationDateBetween(@Param("stateName") String stateName,
+                        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.createdAt BETWEEN :startDate AND :endDate")
+        long countByCourierUserIdAndCreatedAtBetween(@Param("courierId") Integer courierId,
+                        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.deliveryDate BETWEEN :startDate AND :endDate")
+        long countByCourierUserIdAndCurrentStateStateNameAndDeliveryDateBetween(@Param("courierId") Integer courierId,
+                        @Param("stateName") String stateName, @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COUNT(tg) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.currentState.stateName = :stateName AND tg.cancellationDate BETWEEN :startDate AND :endDate")
+        long countByCourierUserIdAndCurrentStateStateNameAndCancellationDateBetween(
+                        @Param("courierId") Integer courierId,
+                        @Param("stateName") String stateName, @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COALESCE(SUM(tg.courierCommission), 0) FROM TrackingGuide tg WHERE tg.courier.userId = :courierId AND tg.deliveryDate BETWEEN :startDate AND :endDate AND tg.currentState.stateName = 'Entregada'")
+        BigDecimal sumCommissionByCourierIdAndPeriod(@Param("courierId") Integer courierId,
+                        @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

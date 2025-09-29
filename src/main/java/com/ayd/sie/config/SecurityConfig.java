@@ -101,6 +101,9 @@ public class SecurityConfig {
                         // Business endpoints - for businesses, coordinators and admins
                         .requestMatchers("/business/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR", "COMERCIO")
 
+                        // Reports endpoints - only for administrators and coordinators
+                        .requestMatchers("/reports/**").hasAnyRole("ADMINISTRADOR", "COORDINADOR")
+
                         // All other requests require authentication
                         .anyRequest().authenticated())
 

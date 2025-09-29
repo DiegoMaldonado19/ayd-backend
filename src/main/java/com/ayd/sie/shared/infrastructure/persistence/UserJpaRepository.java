@@ -32,4 +32,9 @@ public interface UserJpaRepository extends JpaRepository<User, Integer>, JpaSpec
 
     @Query("SELECT u FROM User u WHERE u.role.roleId = :roleId AND u.active = true")
     List<User> findActiveUsersByRole(@Param("roleId") Integer roleId);
+
+    // Additional methods for reporting
+    @Query("SELECT DISTINCT u FROM User u JOIN TrackingGuide tg ON u.userId = tg.courier.userId WHERE tg.createdAt BETWEEN :startDate AND :endDate AND u.role.roleName = 'Repartidor'")
+    List<User> findCouriersWithDeliveriesInPeriod(@Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }
