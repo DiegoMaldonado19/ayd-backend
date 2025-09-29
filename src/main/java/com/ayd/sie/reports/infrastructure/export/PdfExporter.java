@@ -34,8 +34,8 @@ public class PdfExporter {
         // This is a simplified PDF content representation
         // In a real implementation, you would generate proper PDF format
         return String.format("""
-                %PDF-1.4
-                %%PDF Document
+                %%PDF-1.4
+                %%%%PDF Document
 
                 Title: %s
                 Generated: %s
