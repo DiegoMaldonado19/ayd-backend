@@ -226,9 +226,9 @@ public class AdminController {
     // ==============================================
 
     @PostMapping("/users")
-    @Operation(summary = "Register employee", description = "Register a new employee in the system")
+    @Operation(summary = "Register user", description = "Register a new user in the system")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Employee registered successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "200", description = "User registered successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
             @ApiResponse(responseCode = "409", description = "Email or National ID already exists")
     })
@@ -256,10 +256,10 @@ public class AdminController {
     }
 
     @GetMapping("/users/{userId}")
-    @Operation(summary = "Get employee by ID", description = "Retrieve specific employee information by ID")
+    @Operation(summary = "Get user by ID", description = "Retrieve specific user information by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Employee found successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
-            @ApiResponse(responseCode = "404", description = "Employee not found")
+            @ApiResponse(responseCode = "200", description = "User found successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer userId) {
         EmployeeDto employee = adminApplicationService.getEmployeeById(userId);
@@ -267,22 +267,22 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{userId}/status")
-    @Operation(summary = "Change employee status", description = "Activate or deactivate an employee")
+    @Operation(summary = "Change user status", description = "Activate or deactivate a user")
     public ResponseEntity<Map<String, String>> changeEmployeeStatus(
             @PathVariable Integer userId,
             @RequestParam boolean active) {
         adminApplicationService.activateEmployee(userId, active);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Employee status changed successfully");
+        response.put("message", "User status changed successfully");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/{userId}/references")
-    @Operation(summary = "Check employee references", description = "Check all system references for an employee before deletion")
+    @Operation(summary = "Check user references", description = "Check all system references for a user before deletion")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "References checked successfully", content = @Content(schema = @Schema(implementation = UserReferencesDto.class))),
-            @ApiResponse(responseCode = "404", description = "Employee not found")
+            @ApiResponse(responseCode = "404", description = "User not found")
     })
     public ResponseEntity<UserReferencesDto> checkEmployeeReferences(@PathVariable Integer userId) {
         UserReferencesDto references = adminApplicationService.checkUserReferences(userId);
@@ -290,17 +290,17 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{userId}")
-    @Operation(summary = "Delete employee", description = "Permanently delete an employee from the system")
+    @Operation(summary = "Delete user", description = "Permanently delete a user from the system")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Employee deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Employee not found"),
-            @ApiResponse(responseCode = "409", description = "Cannot delete employee due to active dependencies")
+            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "409", description = "Cannot delete user due to active dependencies")
     })
     public ResponseEntity<Map<String, Object>> deleteEmployee(@PathVariable Integer userId) {
         adminApplicationService.deleteEmployee(userId);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Employee deleted successfully");
+        response.put("message", "User deleted successfully");
         response.put("timestamp", System.currentTimeMillis());
 
         return ResponseEntity.ok(response);
