@@ -24,6 +24,8 @@ public class CoordinatorApplicationService {
     private final HandleIncidentUseCase handleIncidentUseCase;
     private final ResolveIncidentUseCase resolveIncidentUseCase;
     private final GetIncidentsUseCase getIncidentsUseCase;
+    private final GetIncidentTypesUseCase getIncidentTypesUseCase;
+    private final GetCancellationTypesUseCase getCancellationTypesUseCase;
 
     // Cancellation processing use cases
     private final ProcessCancellationUseCase processCancellationUseCase;
@@ -71,6 +73,14 @@ public class CoordinatorApplicationService {
 
     public Page<IncidentDto> getIncidents(Boolean resolved, String search, Pageable pageable) {
         return getIncidentsUseCase.execute(resolved, search, pageable);
+    }
+
+    public List<IncidentTypeDto> getIncidentTypes() {
+        return getIncidentTypesUseCase.execute();
+    }
+
+    public List<CancellationTypeDto> getCancellationTypes() {
+        return getCancellationTypesUseCase.execute();
     }
 
     // === CANCELLATION PROCESSING OPERATIONS ===

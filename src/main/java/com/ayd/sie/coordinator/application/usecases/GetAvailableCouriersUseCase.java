@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +42,9 @@ public class GetAvailableCouriersUseCase {
         List<User> couriers = userRepository.findAll(spec);
 
         return couriers.stream()
-                .map(this::mapToCourierWorkloadDto)
+                .map(courier -> Map.entry(courier, hasActiveContract(courier.getUserId())))
+                .filter(Map.Entry::getValue)
+                .map(entry -> mapToCourierWorkloadDto(entry.getKey(), entry.getValue()))
                 .sorted((a, b) -> {
                     // Sort by contract status first, then by pending count
                     if (!a.getHasActiveContract().equals(b.getHasActiveContract())) {
@@ -52,10 +55,11 @@ public class GetAvailableCouriersUseCase {
                 .collect(Collectors.toList());
     }
 
-    private DeliveryDashboardDto.CourierWorkloadDto mapToCourierWorkloadDto(User courier) {
-        // Check if courier has active contract
-        boolean hasActiveContract = contractRepository.findActiveContractByUserId(courier.getUserId()).isPresent();
+    private boolean hasActiveContract(Integer courierId) {
+        return contractRepository.findActiveContractByUserId(courierId).isPresent();
+    }
 
+    private DeliveryDashboardDto.CourierWorkloadDto mapToCourierWorkloadDto(User courier, boolean hasActiveContract) {
         // Get workload statistics
         long assignedCount = trackingGuideRepository.countAssignedToCourier(courier.getUserId());
         long completedCount = trackingGuideRepository.countCompletedByCourier(courier.getUserId());
