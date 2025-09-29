@@ -37,6 +37,7 @@ public class AdminApplicationService {
 
     // Contract management
     private final CreateContractUseCase createContractUseCase;
+    private final UpdateContractUseCase updateContractUseCase;
     private final GetContractsUseCase getContractsUseCase;
     private final TerminateContractUseCase terminateContractUseCase;
     private final DeleteContractUseCase deleteContractUseCase;
@@ -141,6 +142,10 @@ public class AdminApplicationService {
     // Contract operations
     public ContractDto createContract(CreateContractRequestDto request, Integer adminId) {
         return createContractUseCase.execute(request, adminId);
+    }
+
+    public ContractDto updateContract(Integer contractId, UpdateContractRequestDto request) {
+        return updateContractUseCase.execute(contractId, request);
     }
 
     public Page<ContractDto> getContracts(String search, Pageable pageable) {
