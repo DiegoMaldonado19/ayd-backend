@@ -198,6 +198,86 @@ public class ReportsController {
         }
     }
 
+    @GetMapping("/deliveries/export/excel")
+    @Operation(summary = "Export delivery report to Excel", description = "Export delivery status report to Excel format")
+    public ResponseEntity<byte[]> exportDeliveryReportToExcel(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        try {
+            DeliveryReportDto report = reportGeneratorService.generateDeliveryReport(startDate, endDate);
+
+            List<String> headers = List.of("report_date", "period_start", "period_end", "completed_deliveries",
+                    "cancelled_deliveries", "rejected_deliveries", "total_deliveries", "completion_rate");
+
+            List<Map<String, Object>> data = List.of(Map.of(
+                    "report_date", report.getReportDate(),
+                    "period_start", report.getPeriodStart(),
+                    "period_end", report.getPeriodEnd(),
+                    "completed_deliveries", report.getCompletedDeliveries(),
+                    "cancelled_deliveries", report.getCancelledDeliveries(),
+                    "rejected_deliveries", report.getRejectedDeliveries(),
+                    "total_deliveries", report.getTotalDeliveries(),
+                    "completion_rate", report.getCompletionRate()));
+
+            byte[] excelData = excelExporter.exportToExcel("Delivery Report", headers, data);
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            httpHeaders.setContentDispositionFormData("attachment", "delivery-report.xlsx");
+
+            return ResponseEntity.ok().headers(httpHeaders).body(excelData);
+        } catch (Exception e) {
+            log.error("Error exporting delivery report to Excel: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/deliveries/export/image")
+    @Operation(summary = "Export delivery report to image", description = "Export delivery status report to image format")
+    public ResponseEntity<byte[]> exportDeliveryReportToImage(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "png") String format) {
+
+        try {
+            DeliveryReportDto report = reportGeneratorService.generateDeliveryReport(startDate, endDate);
+            String content = objectMapper.writeValueAsString(report);
+            byte[] imageData = imageExporter.exportToImage("Delivery Report", content, format);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setContentDispositionFormData("attachment", "delivery-report." + format);
+
+            return ResponseEntity.ok().headers(headers).body(imageData);
+        } catch (Exception e) {
+            log.error("Error exporting delivery report to image: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/commissions/export/pdf")
+    @Operation(summary = "Export commission report to PDF", description = "Export commission report to PDF format")
+    public ResponseEntity<byte[]> exportCommissionReportToPdf(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        try {
+            List<CommissionReportDto> reports = reportGeneratorService.generateCommissionReport(startDate, endDate);
+            byte[] pdfData = reportExportService.exportToPdf("Commission Report", reports);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.valueOf(reportExportService.getContentType("pdf")));
+            headers.setContentDispositionFormData("attachment",
+                    reportExportService.getExportFilename("commission-report", "pdf"));
+
+            return ResponseEntity.ok().headers(headers).body(pdfData);
+        } catch (Exception e) {
+            log.error("Error exporting commission report to PDF: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/commissions/export/excel")
     @Operation(summary = "Export commission report to Excel", description = "Export commission report to Excel format")
     public ResponseEntity<byte[]> exportCommissionReportToExcel(
@@ -232,6 +312,95 @@ public class ReportsController {
             return ResponseEntity.ok().headers(httpHeaders).body(excelData);
         } catch (Exception e) {
             log.error("Error exporting commission report to Excel: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/commissions/export/image")
+    @Operation(summary = "Export commission report to image", description = "Export commission report to image format")
+    public ResponseEntity<byte[]> exportCommissionReportToImage(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "png") String format) {
+
+        try {
+            List<CommissionReportDto> reports = reportGeneratorService.generateCommissionReport(startDate, endDate);
+            byte[] imageData = reportExportService.exportToImage("Commission Report", reports, format);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.valueOf(reportExportService.getContentType(format)));
+            headers.setContentDispositionFormData("attachment",
+                    reportExportService.getExportFilename("commission-report", format));
+
+            return ResponseEntity.ok().headers(headers).body(imageData);
+        } catch (Exception e) {
+            log.error("Error exporting commission report to image: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/business-ranking/export/pdf")
+    @Operation(summary = "Export business ranking report to PDF", description = "Export business ranking report to PDF format")
+    public ResponseEntity<byte[]> exportBusinessRankingReportToPdf(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        try {
+            List<RankingReportDto> reports = reportGeneratorService.generateBusinessRankingReport(startDate, endDate);
+            byte[] pdfData = reportExportService.exportToPdf("Business Ranking Report", reports);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.valueOf(reportExportService.getContentType("pdf")));
+            headers.setContentDispositionFormData("attachment",
+                    reportExportService.getExportFilename("business-ranking-report", "pdf"));
+
+            return ResponseEntity.ok().headers(headers).body(pdfData);
+        } catch (Exception e) {
+            log.error("Error exporting business ranking report to PDF: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/business-ranking/export/excel")
+    @Operation(summary = "Export business ranking report to Excel", description = "Export business ranking report to Excel format")
+    public ResponseEntity<byte[]> exportBusinessRankingReportToExcel(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        try {
+            List<RankingReportDto> reports = reportGeneratorService.generateBusinessRankingReport(startDate, endDate);
+
+            List<String> headers = List.of("rank_position", "business_name", "business_email", "loyalty_level",
+                    "total_deliveries", "completed_deliveries", "cancelled_deliveries", "total_revenue",
+                    "completion_rate", "average_delivery_value");
+
+            List<Map<String, Object>> data = reports.stream()
+                    .map(report -> {
+                        Map<String, Object> row = new HashMap<>();
+                        row.put("rank_position", report.getRankPosition());
+                        row.put("business_name", report.getBusinessName());
+                        row.put("business_email", report.getBusinessEmail());
+                        row.put("loyalty_level", report.getLoyaltyLevel());
+                        row.put("total_deliveries", report.getTotalDeliveries());
+                        row.put("completed_deliveries", report.getCompletedDeliveries());
+                        row.put("cancelled_deliveries", report.getCancelledDeliveries());
+                        row.put("total_revenue", report.getTotalRevenue());
+                        row.put("completion_rate", report.getCompletionRate());
+                        row.put("average_delivery_value", report.getAverageDeliveryValue());
+                        return row;
+                    })
+                    .toList();
+
+            byte[] excelData = reportExportService.exportToExcel("Business Ranking Report", headers, data);
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.valueOf(reportExportService.getContentType("excel")));
+            httpHeaders.setContentDispositionFormData("attachment",
+                    reportExportService.getExportFilename("business-ranking-report", "excel"));
+
+            return ResponseEntity.ok().headers(httpHeaders).body(excelData);
+        } catch (Exception e) {
+            log.error("Error exporting business ranking report to Excel: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
