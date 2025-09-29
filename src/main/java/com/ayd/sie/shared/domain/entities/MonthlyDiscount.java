@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
@@ -35,21 +34,17 @@ public class MonthlyDiscount {
     @Column(name = "month", nullable = false)
     private Integer month;
 
-    @Column(name = "total_guides", nullable = false)
+    @Column(name = "total_deliveries", nullable = false)
     @Builder.Default
-    private Integer totalGuides = 0;
+    private Integer totalDeliveries = 0;
 
-    @Column(name = "completed_guides", nullable = false)
-    @Builder.Default
-    private Integer completedGuides = 0;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "applied_level_id", nullable = false)
+    private LoyaltyLevel appliedLevel;
 
-    @Column(name = "cancelled_guides", nullable = false)
+    @Column(name = "total_before_discount", nullable = false, precision = 10, scale = 2)
     @Builder.Default
-    private Integer cancelledGuides = 0;
-
-    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
-    @Builder.Default
-    private BigDecimal totalAmount = BigDecimal.ZERO;
+    private BigDecimal totalBeforeDiscount = BigDecimal.ZERO;
 
     @Column(name = "discount_percentage", nullable = false, precision = 5, scale = 2)
     @Builder.Default
@@ -59,14 +54,10 @@ public class MonthlyDiscount {
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
-    @Column(name = "final_amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "total_after_discount", nullable = false, precision = 10, scale = 2)
     @Builder.Default
-    private BigDecimal finalAmount = BigDecimal.ZERO;
+    private BigDecimal totalAfterDiscount = BigDecimal.ZERO;
 
     @Column(name = "calculated_at")
     private LocalDateTime calculatedAt;
-
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 }

@@ -2,6 +2,7 @@ package com.ayd.sie.tracking.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,12 @@ public class RejectDeliveryDto {
     @Schema(description = "Tracking guide number", example = "SIE202500001")
     @NotBlank(message = "Guide number is required")
     private String guideNumber;
+
+    @JsonProperty("user_email")
+    @Schema(description = "Email of the user rejecting the delivery", example = "cliente@ejemplo.com")
+    @NotBlank(message = "User email is required")
+    @Email(message = "User email must be a valid email address")
+    private String userEmail;
 
     @JsonProperty("rejection_reason")
     @Schema(description = "Reason for rejecting the delivery", example = "Package damaged during transport")

@@ -51,15 +51,15 @@ public class PublicTrackingController {
     }
 
     @PostMapping("/reject")
-    @Operation(summary = "Reject delivery", description = "Reject a delivery and optionally initiate return process")
+    @Operation(summary = "Reject delivery", description = "Reject a delivery by providing user email, rejection reason and optionally initiate return process")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Delivery rejected successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request or delivery cannot be rejected"),
-            @ApiResponse(responseCode = "404", description = "Tracking guide not found"),
+            @ApiResponse(responseCode = "404", description = "Tracking guide or user not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Object> rejectDelivery(
-            @Parameter(description = "Rejection details", required = true) @Valid @RequestBody RejectDeliveryDto request) {
+            @Parameter(description = "Rejection details including user email and reason", required = true) @Valid @RequestBody RejectDeliveryDto request) {
 
         log.info("Received request to reject delivery for guide: {}", request.getGuideNumber());
 
@@ -69,8 +69,12 @@ public class PublicTrackingController {
         } catch (RuntimeException e) {
             log.error("Error rejecting delivery for guide {}: {}", request.getGuideNumber(), e.getMessage());
 
-            if (e.getMessage().contains("not found")) {
+            if (e.getMessage().contains("Tracking guide not found")) {
                 return ResponseEntity.status(404).body("Tracking guide not found");
+            }
+
+            if (e.getMessage().contains("User not found")) {
+                return ResponseEntity.status(404).body("User not found with the provided email");
             }
 
             if (e.getMessage().contains("Cannot reject")) {

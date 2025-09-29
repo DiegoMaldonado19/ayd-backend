@@ -24,6 +24,7 @@ public class RejectDeliveryUseCase {
     private final StateHistoryJpaRepository stateHistoryRepository;
     private final CancellationJpaRepository cancellationRepository;
     private final CancellationTypeJpaRepository cancellationTypeRepository;
+    private final UserJpaRepository userRepository;
     private final EmailService emailService;
 
     public RejectDeliveryResponseDto rejectDelivery(RejectDeliveryDto request) {
@@ -44,6 +45,10 @@ public class RejectDeliveryUseCase {
         CancellationType customerCancellation = cancellationTypeRepository.findByTypeNameAndActiveTrue("Cliente")
                 .orElseThrow(() -> new RuntimeException("Customer cancellation type not found"));
 
+        // Find user by email
+        User rejectionUser = userRepository.findByEmail(request.getUserEmail())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + request.getUserEmail()));
+
         // Update guide status to rejected
         guide.setCurrentState(rejectedState);
         guide.setCancellationDate(LocalDateTime.now());
@@ -54,10 +59,10 @@ public class RejectDeliveryUseCase {
         trackingGuideRepository.save(guide);
 
         // Record state change in history
-        recordStateHistory(guide, rejectedState, request.getRejectionReason());
+        recordStateHistory(guide, rejectedState, request.getRejectionReason(), rejectionUser);
 
         // Create cancellation record
-        createCancellationRecord(guide, customerCancellation, request);
+        createCancellationRecord(guide, customerCancellation, request, rejectionUser);
 
         // Send notifications
         sendRejectionNotifications(guide, request.getRejectionReason());
@@ -90,12 +95,12 @@ public class RejectDeliveryUseCase {
         }
     }
 
-    private void recordStateHistory(TrackingGuide guide, TrackingState newState, String reason) {
+    private void recordStateHistory(TrackingGuide guide, TrackingState newState, String reason, User user) {
         StateHistory history = StateHistory.builder()
                 .guide(guide)
                 .state(newState)
-                .user(null) // Public rejection, no user
-                .observations("Delivery rejected by recipient: " + reason)
+                .user(user) // Use the user who is rejecting the delivery
+                .observations("Delivery rejected by user " + user.getEmail() + ": " + reason)
                 .changedAt(LocalDateTime.now())
                 .build();
 
@@ -103,12 +108,12 @@ public class RejectDeliveryUseCase {
     }
 
     private void createCancellationRecord(TrackingGuide guide, CancellationType cancellationType,
-            RejectDeliveryDto request) {
+            RejectDeliveryDto request, User user) {
         Cancellation cancellation = Cancellation.builder()
                 .guide(guide)
                 .cancellationType(cancellationType)
-                .cancelledByUser(null) // Public rejection, no specific user
-                .reason("Customer rejection: " + request.getRejectionReason())
+                .cancelledByUser(user) // Use the user who is rejecting the delivery
+                .reason("Customer rejection by " + user.getEmail() + ": " + request.getRejectionReason())
                 .penaltyAmount(BigDecimal.ZERO) // No penalty for customer rejection
                 .courierCommission(BigDecimal.ZERO)
                 .cancelledAt(LocalDateTime.now())
