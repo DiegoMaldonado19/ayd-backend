@@ -23,9 +23,9 @@ public class GetBusinessesUseCase {
         Page<Business> businesses;
 
         if (search != null && !search.trim().isEmpty()) {
-            businesses = businessRepository.findActiveBySearch(search.trim(), pageable);
+            businesses = businessRepository.findBySearch(search.trim(), pageable);
         } else {
-            businesses = businessRepository.findByActiveTrue(pageable);
+            businesses = businessRepository.findAll(pageable);
         }
 
         return businesses.map(this::mapToDto);

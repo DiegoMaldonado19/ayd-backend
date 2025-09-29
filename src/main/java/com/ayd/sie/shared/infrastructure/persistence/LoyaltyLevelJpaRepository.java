@@ -31,7 +31,7 @@ public interface LoyaltyLevelJpaRepository extends JpaRepository<LoyaltyLevel, I
 
     Optional<LoyaltyLevel> findByLevelName(String levelName);
 
-    List<LoyaltyLevel> findByActiveTrueOrderByMinDeliveries();
+    List<LoyaltyLevel> findAllByOrderByMinDeliveries();
 
     @Query("SELECT ll FROM LoyaltyLevel ll WHERE ll.minDeliveries <= :deliveries ORDER BY ll.minDeliveries DESC")
     List<LoyaltyLevel> findApplicableLevels(@Param("deliveries") Integer deliveries);
