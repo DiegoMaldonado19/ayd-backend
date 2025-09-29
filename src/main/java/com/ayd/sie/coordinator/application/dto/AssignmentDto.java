@@ -19,10 +19,6 @@ import java.time.LocalDateTime;
 @Schema(description = "Assignment data transfer object")
 public class AssignmentDto {
 
-    @Schema(description = "Assignment ID", example = "1")
-    @JsonProperty("assignment_id")
-    private Integer assignmentId;
-
     @Schema(description = "Guide ID to assign", example = "1", required = true)
     @JsonProperty("guide_id")
     @NotNull(message = "Guide ID is required")

@@ -65,13 +65,27 @@ public class GetPendingDeliveriesUseCase {
                 return AssignmentDto.builder()
                                 .guideId(guide.getGuideId())
                                 .guideNumber(guide.getGuideNumber())
+                                .courierId(guide.getCourier() != null ? guide.getCourier().getUserId() : null)
+                                .courierName(guide.getCourier() != null
+                                                ? guide.getCourier().getFirstName() + " "
+                                                                + guide.getCourier().getLastName()
+                                                : null)
+                                .coordinatorId(guide.getCoordinator() != null ? guide.getCoordinator().getUserId()
+                                                : null)
+                                .coordinatorName(guide.getCoordinator() != null
+                                                ? guide.getCoordinator().getFirstName() + " "
+                                                                + guide.getCoordinator().getLastName()
+                                                : null)
+                                .basePrice(guide.getBasePrice())
+                                .courierCommission(guide.getCourierCommission())
+                                .assignedAt(guide.getAssignmentDate())
+                                .assignmentAccepted(guide.getAssignmentAccepted())
+                                .assignmentAcceptedAt(guide.getAssignmentAcceptedAt())
                                 .businessName(guide.getBusiness().getBusinessName())
                                 .recipientName(guide.getRecipientName())
                                 .recipientAddress(guide.getRecipientAddress())
-                                .basePrice(guide.getBasePrice()) // Cambiado de Double a BigDecimal
                                 .currentState(guide.getCurrentState().getStateName())
                                 .observations(guide.getObservations())
-                                .assignmentAccepted(false)
                                 .build();
         }
 }
