@@ -266,6 +266,21 @@ public class AdminController {
         return ResponseEntity.ok(employee);
     }
 
+    @PutMapping("/users/{userId}")
+    @Operation(summary = "Update user", description = "Update user information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "409", description = "Email or National ID already exists")
+    })
+    public ResponseEntity<EmployeeDto> updateEmployee(
+            @PathVariable Integer userId,
+            @Valid @RequestBody UpdateEmployeeRequestDto request) {
+        EmployeeDto employee = adminApplicationService.updateEmployee(userId, request);
+        return ResponseEntity.ok(employee);
+    }
+
     @PatchMapping("/users/{userId}/status")
     @Operation(summary = "Change user status", description = "Activate or deactivate a user")
     public ResponseEntity<Map<String, String>> changeEmployeeStatus(
