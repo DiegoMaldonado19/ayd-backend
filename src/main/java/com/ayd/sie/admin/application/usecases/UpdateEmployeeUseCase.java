@@ -48,10 +48,6 @@ public class UpdateEmployeeUseCase {
         if (request.getRoleId() != null && !request.getRoleId().equals(user.getRole().getRoleId())) {
             Role role = roleRepository.findById(request.getRoleId())
                     .orElseThrow(() -> new AccessDeniedException("Invalid role"));
-
-            if (!role.getRoleName().equals("Coordinador") && !role.getRoleName().equals("Repartidor")) {
-                throw new ResourceNotFoundException("Can only assign Coordinator and Courier roles");
-            }
             user.setRole(role);
         }
 
