@@ -1,11 +1,14 @@
 package com.ayd.sie.coordinator.infrastructure.web;
 
 import com.ayd.sie.coordinator.application.dto.*;
+import com.ayd.sie.coordinator.application.usecases.CreateGuideByCoordinatorUseCase;
 import com.ayd.sie.coordinator.application.services.CoordinatorApplicationService;
+import com.ayd.sie.business.application.dto.GuideResponseDto;
 import com.ayd.sie.shared.infrastructure.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +37,30 @@ import java.util.Map;
 public class CoordinatorController {
 
     private final CoordinatorApplicationService coordinatorApplicationService;
+    private final CreateGuideByCoordinatorUseCase createGuideByCoordinatorUseCase;
+
+    // ===== GUIDE CREATION ENDPOINTS =====
+
+    @PostMapping("/guides")
+    @Operation(summary = "Create a new tracking guide", description = "Creates a new tracking guide for delivery on behalf of a business. Includes business ID and applies loyalty discounts automatically.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Guide created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - User is not a coordinator"),
+            @ApiResponse(responseCode = "404", description = "Business or branch not found")
+    })
+    public ResponseEntity<GuideResponseDto> createGuideForBusiness(
+            @Valid @RequestBody CreateGuideByCoordinatorDto createGuideDto) {
+
+        Integer coordinatorId = SecurityUtils.getCurrentUserId();
+        GuideResponseDto response = createGuideByCoordinatorUseCase.execute(createGuideDto, coordinatorId);
+
+        log.info("Guide created by coordinator {} for business {} - Guide: {}",
+                coordinatorId, createGuideDto.getBusinessId(), response.getGuide_number());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     // ===== DELIVERY ASSIGNMENT ENDPOINTS =====
 
