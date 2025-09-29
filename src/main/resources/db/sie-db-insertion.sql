@@ -130,7 +130,7 @@ INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, 
 -- Business Users (Role ID = 4)
 INSERT INTO users (role_id, email, password_hash, first_name, last_name, phone, address, national_id) VALUES
 (4, 'jeffrey.menendez.castillo@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Fernando Jose', 'Castillo Mejia', '57123456', 'Once Calle 12-34 Zona 11', '2987654321011'),
-(4, 'jeffreymenendez201930643@cunoc.edu.gt', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Patricia Maria', 'Alvarez Torres', '57234567', 'Doce Avenida 13-45 Zona 12', '2987654321012'),
+(4, 'antillon@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Patricia Maria', 'Alvarez Torres', '57234567', 'Doce Avenida 13-45 Zona 12', '2987654321012'),
 (4, 'libreria.nacional@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Ricardo Alberto', 'Mendez Silva', '57345678', 'Trece Calle 14-56 Zona 13', '2987654321013'),
 (4, 'farmacia.salud@gmail.com', '$2a$12$bJVP7ttQby16rb6CEGlYq.lhAe1XXDxB/ryDHAuuZf9oDjZv4wgKq', 'Andrea Sofia', 'Lopez Gutierrez', '57456789', 'Catorce Avenida 15-67 Zona 14', '2987654321014');
 
