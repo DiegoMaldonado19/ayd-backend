@@ -19,7 +19,7 @@ import java.util.List;
 public class TrackingResponseDto {
 
     @JsonProperty("guide_number")
-    @Schema(description = "Unique tracking number", example = "SIE202500001")
+    @Schema(description = "Unique tracking number", example = "202500000001")
     private String guideNumber;
 
     @JsonProperty("current_status")

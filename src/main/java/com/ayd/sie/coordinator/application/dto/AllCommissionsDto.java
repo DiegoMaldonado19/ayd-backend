@@ -21,7 +21,7 @@ public class AllCommissionsDto {
     @JsonProperty("guide_id")
     private Integer guideId;
 
-    @Schema(description = "Guide number", example = "SIE202409001")
+    @Schema(description = "Guide number", example = "202500000001")
     @JsonProperty("guide_number")
     private String guideNumber;
 

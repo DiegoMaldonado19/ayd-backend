@@ -25,7 +25,7 @@ public class AssignmentDto {
     @Positive(message = "Guide ID must be positive")
     private Integer guideId;
 
-    @Schema(description = "Guide number", example = "SIE202409001")
+    @Schema(description = "Guide number", example = "202500000001")
     @JsonProperty("guide_number")
     private String guideNumber;
 
