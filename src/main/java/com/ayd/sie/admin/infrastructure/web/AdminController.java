@@ -225,7 +225,7 @@ public class AdminController {
     // EMPLOYEE MANAGEMENT
     // ==============================================
 
-    @PostMapping("/employees")
+    @PostMapping("/users")
     @Operation(summary = "Register employee", description = "Register a new employee in the system")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Employee registered successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
@@ -238,8 +238,8 @@ public class AdminController {
         return ResponseEntity.ok(employee);
     }
 
-    @GetMapping("/employees")
-    @Operation(summary = "Get employees", description = "Retrieve paginated list of employees")
+    @GetMapping("/users")
+    @Operation(summary = "Get users", description = "Retrieve paginated list of users")
     public ResponseEntity<Page<EmployeeDto>> getEmployees(
             @RequestParam(required = false) Integer roleId,
             @RequestParam(required = false) String search,
@@ -251,11 +251,11 @@ public class AdminController {
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<EmployeeDto> employees = adminApplicationService.getEmployees(roleId, search, pageable);
-        return ResponseEntity.ok(employees);
+        Page<EmployeeDto> users = adminApplicationService.getEmployees(roleId, search, pageable);
+        return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/employees/{userId}")
+    @GetMapping("/users/{userId}")
     @Operation(summary = "Get employee by ID", description = "Retrieve specific employee information by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Employee found successfully", content = @Content(schema = @Schema(implementation = EmployeeDto.class))),
@@ -266,7 +266,7 @@ public class AdminController {
         return ResponseEntity.ok(employee);
     }
 
-    @PatchMapping("/employees/{userId}/status")
+    @PatchMapping("/users/{userId}/status")
     @Operation(summary = "Change employee status", description = "Activate or deactivate an employee")
     public ResponseEntity<Map<String, String>> changeEmployeeStatus(
             @PathVariable Integer userId,
@@ -278,7 +278,7 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/employees/{userId}/references")
+    @GetMapping("/users/{userId}/references")
     @Operation(summary = "Check employee references", description = "Check all system references for an employee before deletion")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "References checked successfully", content = @Content(schema = @Schema(implementation = UserReferencesDto.class))),
@@ -289,7 +289,7 @@ public class AdminController {
         return ResponseEntity.ok(references);
     }
 
-    @DeleteMapping("/employees/{userId}")
+    @DeleteMapping("/users/{userId}")
     @Operation(summary = "Delete employee", description = "Permanently delete an employee from the system")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Employee deleted successfully"),
