@@ -30,7 +30,7 @@ public class CancellationDto {
     @Positive(message = "Guide ID must be positive")
     private Integer guideId;
 
-    @Schema(description = "Guide number", example = "SIE202409007")
+    @Schema(description = "Guide number", example = "202500000007")
     @JsonProperty("guide_number")
     private String guideNumber;
 

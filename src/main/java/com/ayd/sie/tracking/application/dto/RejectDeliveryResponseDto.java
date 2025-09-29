@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class RejectDeliveryResponseDto {
 
     @JsonProperty("guide_number")
-    @Schema(description = "Tracking guide number", example = "SIE202500001")
+    @Schema(description = "Tracking guide number", example = "202500000001")
     private String guideNumber;
 
     @JsonProperty("status")

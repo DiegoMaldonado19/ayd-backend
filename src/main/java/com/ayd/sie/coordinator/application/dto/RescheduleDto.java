@@ -30,7 +30,7 @@ public class RescheduleDto {
     @Positive(message = "Guide ID must be positive")
     private Integer guideId;
 
-    @Schema(description = "Guide number", example = "SIE202409005")
+    @Schema(description = "Guide number", example = "202500000005")
     @JsonProperty("guide_number")
     private String guideNumber;
 

@@ -34,7 +34,7 @@ public class PublicTrackingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<TrackingResponseDto> getTrackingInfo(
-            @Parameter(description = "Guide number to track", example = "SIE202500001", required = true) @PathVariable String guideNumber) {
+            @Parameter(description = "Guide number to track", example = "202500000001", required = true) @PathVariable String guideNumber) {
 
         log.info("Received request to track guide: {}", guideNumber);
 
@@ -94,7 +94,7 @@ public class PublicTrackingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<TrackingResponseDto> searchGuide(
-            @Parameter(description = "Guide number to search", example = "SIE202500001", required = true) @RequestParam String guideNumber) {
+            @Parameter(description = "Guide number to search", example = "202500000001", required = true) @RequestParam String guideNumber) {
 
         if (guideNumber == null || guideNumber.trim().isEmpty()) {
             return ResponseEntity.badRequest().build();

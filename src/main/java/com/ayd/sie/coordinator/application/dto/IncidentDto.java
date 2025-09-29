@@ -30,7 +30,7 @@ public class IncidentDto {
     @Positive(message = "Guide ID must be positive")
     private Integer guideId;
 
-    @Schema(description = "Guide number", example = "SIE202409004")
+    @Schema(description = "Guide number", example = "202500000004")
     @JsonProperty("guide_number")
     private String guideNumber;
 

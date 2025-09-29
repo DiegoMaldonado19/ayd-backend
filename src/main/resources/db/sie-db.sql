@@ -711,14 +711,18 @@ BEGIN
     DECLARE next_number INT;
     DECLARE current_year VARCHAR(4);
     
-    SET current_year = YEAR(CURDATE());
+    -- Only generate if guide_number is NULL
+    IF NEW.guide_number IS NULL THEN
+        SET current_year = YEAR(CURDATE());
+        
+        SELECT IFNULL(MAX(CAST(SUBSTRING(guide_number, 5) AS UNSIGNED)), 0) + 1
+        INTO next_number
+        FROM tracking_guides
+        WHERE guide_number LIKE CONCAT(current_year, '%');
+        
+        SET NEW.guide_number = CONCAT(current_year, LPAD(next_number, 8, '0'));
+    END IF;
     
-    SELECT IFNULL(MAX(CAST(SUBSTRING(guide_number, 5) AS UNSIGNED)), 0) + 1
-    INTO next_number
-    FROM tracking_guides
-    WHERE guide_number LIKE CONCAT(current_year, '%');
-    
-    SET NEW.guide_number = CONCAT(current_year, LPAD(next_number, 8, '0'));
     SET NEW.current_state_id = 1; -- Always start with Created state
 END//
 
