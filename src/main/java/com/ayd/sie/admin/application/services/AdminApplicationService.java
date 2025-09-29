@@ -29,6 +29,7 @@ public class AdminApplicationService {
 
     // Employee management
     private final RegisterEmployeeUseCase registerEmployeeUseCase;
+    private final UpdateEmployeeUseCase updateEmployeeUseCase;
     private final GetEmployeesUseCase getEmployeesUseCase;
     private final DeleteEmployeeUseCase deleteEmployeeUseCase;
     private final ActivateEmployeeUseCase activateEmployeeUseCase;
@@ -119,6 +120,10 @@ public class AdminApplicationService {
 
     public EmployeeDto getEmployeeById(Integer userId) {
         return getEmployeesUseCase.findById(userId);
+    }
+
+    public EmployeeDto updateEmployee(Integer userId, UpdateEmployeeRequestDto request) {
+        return updateEmployeeUseCase.execute(userId, request);
     }
 
     public void activateEmployee(Integer userId, boolean active) {
