@@ -14,27 +14,27 @@ import java.util.Optional;
 @Repository
 public interface UserJpaRepository extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
 
-    Optional<User> findByEmailAndActiveTrue(String email);
+        Optional<User> findByEmailAndActiveTrue(String email);
 
-    Optional<User> findByEmail(String email);
+        Optional<User> findByEmail(String email);
 
-    Optional<User> findByPasswordResetToken(String passwordResetToken);
+        Optional<User> findByPasswordResetToken(String passwordResetToken);
 
-    boolean existsByEmail(String email);
+        boolean existsByEmail(String email);
 
-    boolean existsByNationalId(String nationalId);
+        boolean existsByNationalId(String nationalId);
 
-    List<User> findByRoleRoleIdAndActiveTrue(Integer roleId);
+        List<User> findByRoleRoleId(Integer roleId);
 
-    @Query("SELECT u FROM User u WHERE u.email = :email AND u.active = true AND " +
-            "(u.lockedUntil IS NULL OR u.lockedUntil < :now)")
-    Optional<User> findActiveUnlockedUserByEmail(@Param("email") String email, @Param("now") LocalDateTime now);
+        @Query("SELECT u FROM User u WHERE u.email = :email AND u.active = true AND " +
+                        "(u.lockedUntil IS NULL OR u.lockedUntil < :now)")
+        Optional<User> findActiveUnlockedUserByEmail(@Param("email") String email, @Param("now") LocalDateTime now);
 
-    @Query("SELECT u FROM User u WHERE u.role.roleId = :roleId AND u.active = true")
-    List<User> findActiveUsersByRole(@Param("roleId") Integer roleId);
+        @Query("SELECT u FROM User u WHERE u.role.roleId = :roleId AND u.active = true")
+        List<User> findActiveUsersByRole(@Param("roleId") Integer roleId);
 
-    // Additional methods for reporting
-    @Query("SELECT DISTINCT u FROM User u JOIN TrackingGuide tg ON u.userId = tg.courier.userId WHERE tg.createdAt BETWEEN :startDate AND :endDate AND u.role.roleName = 'Repartidor'")
-    List<User> findCouriersWithDeliveriesInPeriod(@Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+        // Additional methods for reporting
+        @Query("SELECT DISTINCT u FROM User u JOIN TrackingGuide tg ON u.userId = tg.courier.userId WHERE tg.createdAt BETWEEN :startDate AND :endDate AND u.role.roleName = 'Repartidor'")
+        List<User> findCouriersWithDeliveriesInPeriod(@Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 }

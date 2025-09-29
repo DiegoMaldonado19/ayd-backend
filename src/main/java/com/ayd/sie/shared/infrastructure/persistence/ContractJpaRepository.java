@@ -29,17 +29,13 @@ public interface ContractJpaRepository extends JpaRepository<Contract, Integer>,
         @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId ORDER BY c.createdAt DESC")
         List<Contract> findByUserId(@Param("userId") Integer userId);
 
-        // Add this method for GetContractsUseCase - search with active filter
-        @Query("SELECT c FROM Contract c WHERE c.active = true AND (" +
+        // Add this method for GetContractsUseCase - search contracts
+        @Query("SELECT c FROM Contract c WHERE (" +
                         "LOWER(c.user.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
                         "LOWER(c.user.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
                         "LOWER(c.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
                         "LOWER(c.contractType.typeName) LIKE LOWER(CONCAT('%', :search, '%')))")
-        Page<Contract> findActiveBySearch(@Param("search") String search, Pageable pageable);
-
-        // Add this method for GetContractsUseCase - find all active contracts with
-        // pagination
-        Page<Contract> findByActiveTrue(Pageable pageable);
+        Page<Contract> findBySearch(@Param("search") String search, Pageable pageable);
 
         // Active contract counts
         @Query("SELECT COUNT(DISTINCT c.user.userId) FROM Contract c " +
@@ -64,14 +60,6 @@ public interface ContractJpaRepository extends JpaRepository<Contract, Integer>,
                         "WHERE c.active = true " +
                         "AND CURRENT_DATE BETWEEN c.startDate AND COALESCE(c.endDate, '9999-12-31'))")
         long countCouriersWithoutActiveContract(@Param("roleId") Integer roleId);
-
-        // Search contracts
-        @Query("SELECT c FROM Contract c WHERE " +
-                        "LOWER(c.user.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "LOWER(c.user.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "LOWER(c.user.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-                        "LOWER(c.contractType.typeName) LIKE LOWER(CONCAT('%', :search, '%'))")
-        Page<Contract> searchContracts(@Param("search") String search, Pageable pageable);
 
         // Additional methods for DeleteEmployeeUseCase
         @Query("SELECT c FROM Contract c WHERE c.user.userId = :userId ORDER BY c.createdAt DESC")

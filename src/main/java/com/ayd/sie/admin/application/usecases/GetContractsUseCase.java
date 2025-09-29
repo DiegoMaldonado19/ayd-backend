@@ -23,9 +23,9 @@ public class GetContractsUseCase {
         Page<Contract> contracts;
 
         if (search != null && !search.trim().isEmpty()) {
-            contracts = contractRepository.findActiveBySearch(search.trim(), pageable);
+            contracts = contractRepository.findBySearch(search.trim(), pageable);
         } else {
-            contracts = contractRepository.findByActiveTrue(pageable);
+            contracts = contractRepository.findAll(pageable);
         }
 
         return contracts.map(this::mapToDto);

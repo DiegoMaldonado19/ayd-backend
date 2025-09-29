@@ -20,11 +20,11 @@ public interface BranchJpaRepository extends JpaRepository<Branch, Integer> {
 
     Page<Branch> findByActiveTrue(Pageable pageable);
 
-    @Query("SELECT b FROM Branch b WHERE b.active = true AND " +
+    @Query("SELECT b FROM Branch b WHERE " +
             "(LOWER(b.branchName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(b.branchCode) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
             "LOWER(b.city) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Branch> findActiveBySearch(@Param("search") String search, Pageable pageable);
+    Page<Branch> findBySearch(@Param("search") String search, Pageable pageable);
 
     boolean existsByBranchCodeAndActiveTrue(String branchCode);
 
