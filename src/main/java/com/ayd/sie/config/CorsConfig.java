@@ -18,12 +18,7 @@ public class CorsConfig {
                 // Permitir orígenes específicos - desarrollo y producción
                 configuration.setAllowedOriginPatterns(Arrays.asList(
                                 // Desarrollo local
-                                "http://localhost:*",
-                                "http://127.0.0.1:*",
-                                
-                                // Servidor de producción
-                                "http://20.55.81.100:*",
-                                "https://20.55.81.100:*"));
+                                "*"));
 
                 // Métodos HTTP permitidos
                 configuration.setAllowedMethods(Arrays.asList(
